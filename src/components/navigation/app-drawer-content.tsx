@@ -23,6 +23,7 @@ const drawerLinks: DrawerLink[] = [
     { label: "Profile", href: "/profile" as Href },
     { label: "Announcements", href: "/announcements" as Href },
     { label: "Campus services", href: "/campus-services" as Href },
+    { label: "Camscan", href: "/camscan" as Href },
 ]
 
 export function AppDrawerContent(props: DrawerContentComponentProps) {

@@ -32,6 +32,11 @@ const quickLinks: QuickLink[] = [
         description: "Library, transport, and support",
         href: "/campus-services" as Href,
     },
+    {
+        title: "Camscan",
+        description: "Scan documents and manage collections",
+        href: "/camscan" as Href,
+    },
 ]
 
 export default function HomeScreen() {

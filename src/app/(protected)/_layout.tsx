@@ -43,6 +43,7 @@ export default function ProtectedLayout() {
                 name="campus-services"
                 options={hiddenDrawerItem}
             />
+            <Drawer.Screen name="camscan" options={{ title: "Camscan" }} />
         </Drawer>
     )
 }
