@@ -1,26 +1,9 @@
-// import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-// import React from 'react';
-// import { useColorScheme } from 'react-native';
-
-// import { AnimatedSplashOverlay } from '@/components/animated-icon';
-// import AppTabs from '@/components/app-tabs';
-
-// export default function TabLayout() {
-//   const colorScheme = useColorScheme();
-//   return (
-//     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-//       <AnimatedSplashOverlay />
-//       <AppTabs />
-//     </ThemeProvider>
-//   );
-// }
-
-
-
 import { Stack, useRouter, useSegments } from "expo-router"
 import { useEffect } from "react"
 
+import "@/global.css"
 import "@/lib/network/interceptors"
+import { ColorModeProvider } from "@/contexts/color-mode"
 import useAuthorizationStore from "@/store/authorization"
 
 export default function RootLayout() {
@@ -42,11 +25,15 @@ export default function RootLayout() {
         if (user && inAuthGroup) {
             router.replace("/")
         }
-    }, [user, hydrated, segments])
+    }, [user, hydrated, segments, router])
 
     if (!hydrated) {
         return null
     }
 
-    return <Stack screenOptions={{ headerShown: false }} />
+    return (
+        <ColorModeProvider>
+            <Stack screenOptions={{ headerShown: false }} />
+        </ColorModeProvider>
+    )
 }

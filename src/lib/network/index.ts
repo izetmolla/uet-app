@@ -36,6 +36,5 @@ export {
     isApiErrorBody,
     withError,
 } from "./errors"
-export { queryClient } from "./query-client"
 
 export default ApiService
