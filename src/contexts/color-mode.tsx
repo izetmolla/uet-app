@@ -19,7 +19,7 @@ type ColorModeContextValue = {
 const ColorModeContext = createContext<ColorModeContextValue | null>(null)
 
 export function ColorModeProvider({ children }: { children: ReactNode }) {
-    const [colorMode, setColorMode] = useState<ColorMode>("dark")
+    const [colorMode, setColorMode] = useState<ColorMode>("light")
 
     const toggleColorMode = useCallback(() => {
         setColorMode((mode) => (mode === "light" ? "dark" : "light"))

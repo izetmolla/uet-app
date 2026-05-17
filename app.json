@@ -36,6 +36,19 @@
             "imageWidth": 76
           }
         }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "We need camera access so you can scan documents.",
+          "recordAudioAndroid": false
+        }
+      ],
+      [
+        "react-native-document-scanner-plugin",
+        {
+          "cameraPermission": "We need camera access so you can scan documents."
+        }
       ]
     ],
     "experiments": {

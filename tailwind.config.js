@@ -191,6 +191,7 @@ module.exports = {
         '2xs': '10px',
       },
       boxShadow: {
+        'brand-glow': '0 4px 24px -4px rgba(83, 88, 238, 0.45)',
         'hard-1': '-2px 2px 8px 0px rgba(38, 38, 38, 0.20)',
         'hard-2': '0px 3px 10px 0px rgba(38, 38, 38, 0.20)',
         'hard-3': '2px 2px 8px 0px rgba(38, 38, 38, 0.20)',

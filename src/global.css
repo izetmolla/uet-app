@@ -1,6 +1,28 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* uetapp-v3 authorization / general theme tokens */
+:root {
+  --auth-page-bg: 250 252 254;
+  --auth-card-bg: 255 255 255;
+  --auth-border: 235 235 235;
+  --auth-border-hover: 204 204 204;
+  --auth-input-border: 224 224 224;
+  --brand-gradient-start: #5358ee;
+  --brand-gradient-end: #009bc1;
+}
+
+.dark {
+  --auth-page-bg: 5 7 15;
+  --auth-card-bg: 12 15 24;
+  --auth-border: 48 53 139;
+  --auth-border-hover: 62 66 182;
+  --auth-input-border: 62 66 182;
+  --brand-gradient-start: #6266ff;
+  --brand-gradient-end: #00afd5;
+}
+
 :root {
   --font-display:
     Spline Sans, Inter, ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji,
