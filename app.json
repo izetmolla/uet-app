@@ -31,9 +31,19 @@
         "expo-splash-screen",
         {
           "backgroundColor": "#2e4d88",
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 120,
+          "dark": {
+            "image": "./assets/images/splash-icon.png",
+            "backgroundColor": "#05070f"
+          },
           "android": {
             "image": "./assets/images/splash.png",
             "imageWidth": 76
+          },
+          "ios": {
+            "image": "./assets/images/splash-icon.png",
+            "imageWidth": 120
           }
         }
       ],
@@ -49,7 +59,9 @@
         {
           "cameraPermission": "We need camera access so you can scan documents."
         }
-      ]
+      ],
+      "expo-web-browser",
+      "expo-video"
     ],
     "experiments": {
       "typedRoutes": true,

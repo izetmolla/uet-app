@@ -3,6 +3,10 @@
  * navigation code loads, so dependencies receive a requestIdleCallback-based
  * implementation without triggering the RN 0.83 deprecation warning.
  */
+const SplashScreen = require("expo-splash-screen")
+
+void SplashScreen.preventAutoHideAsync()
+
 const ReactNative = require("react-native")
 
 Object.defineProperty(ReactNative, "InteractionManager", {
