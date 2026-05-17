@@ -1,7 +1,10 @@
 import type { ReactNode } from "react"
-import { View } from "react-native"
 
 import { AppHeader } from "@/components/navigation/app-header"
+import {
+    ScreenContentSafeArea,
+    ScreenSafeArea,
+} from "@/components/navigation/screen-safe-area"
 
 type CamscanShellProps = {
     children: ReactNode
@@ -10,9 +13,9 @@ type CamscanShellProps = {
 
 export function CamscanShell({ children, showMenu = true }: CamscanShellProps) {
     return (
-        <View style={{ flex: 1 }}>
+        <ScreenSafeArea>
             <AppHeader title="Camscan" showMenu={showMenu} />
-            <View style={{ flex: 1 }}>{children}</View>
-        </View>
+            <ScreenContentSafeArea>{children}</ScreenContentSafeArea>
+        </ScreenSafeArea>
     )
 }

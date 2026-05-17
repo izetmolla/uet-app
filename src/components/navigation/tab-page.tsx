@@ -1,7 +1,10 @@
 import type { ReactNode } from "react"
-import { View } from "react-native"
 
 import { AppHeader } from "@/components/navigation/app-header"
+import {
+    ScreenContentSafeArea,
+    ScreenSafeArea,
+} from "@/components/navigation/screen-safe-area"
 
 type TabPageProps = {
     title: string
@@ -10,9 +13,9 @@ type TabPageProps = {
 
 export function TabPage({ title, children }: TabPageProps) {
     return (
-        <View style={{ flex: 1 }}>
+        <ScreenSafeArea>
             <AppHeader title={title} />
-            <View style={{ flex: 1 }}>{children}</View>
-        </View>
+            <ScreenContentSafeArea>{children}</ScreenContentSafeArea>
+        </ScreenSafeArea>
     )
 }

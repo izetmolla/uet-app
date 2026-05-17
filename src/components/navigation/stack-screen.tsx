@@ -1,6 +1,10 @@
 import type { ReactNode } from "react"
 
 import { AppHeader } from "@/components/navigation/app-header"
+import {
+    ScreenContentSafeArea,
+    ScreenSafeArea,
+} from "@/components/navigation/screen-safe-area"
 import { Box } from "@/components/ui/box"
 
 type StackScreenProps = {
@@ -17,7 +21,7 @@ export function StackScreen({
     showNotifications = false,
 }: StackScreenProps) {
     return (
-        <Box className="flex-1 bg-background-50">
+        <ScreenSafeArea>
             <AppHeader
                 title={title}
                 showBack
@@ -25,7 +29,9 @@ export function StackScreen({
                 showSearch={showSearch}
                 showNotifications={showNotifications}
             />
-            {children}
-        </Box>
+            <ScreenContentSafeArea>
+                <Box className="flex-1 bg-background-50">{children}</Box>
+            </ScreenContentSafeArea>
+        </ScreenSafeArea>
     )
 }

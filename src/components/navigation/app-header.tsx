@@ -1,7 +1,6 @@
 import { DrawerActions } from "@react-navigation/native"
 import { type Href, useNavigation, useRouter } from "expo-router"
 import { Pressable } from "react-native"
-import { useSafeAreaInsets } from "react-native-safe-area-context"
 import {
     ArrowLeft,
     Bell,
@@ -30,7 +29,6 @@ export function AppHeader({
 }: AppHeaderProps) {
     const router = useRouter()
     const navigation = useNavigation()
-    const insets = useSafeAreaInsets()
 
     const iconColor = "#5358ee"
     const mutedColor = "#595d69"
@@ -40,10 +38,7 @@ export function AppHeader({
     }
 
     return (
-        <Box
-            className="border-b border-outline-200 bg-background-0"
-            style={{ paddingTop: insets.top }}
-        >
+        <Box className="border-b border-outline-200 bg-background-0">
             <HStack className="h-14 items-center justify-between px-4">
                 <HStack className="min-w-[88px] items-center gap-1">
                     {showBack ? (

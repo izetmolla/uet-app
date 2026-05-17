@@ -7,23 +7,21 @@ import {
     User,
 } from "lucide-react-native"
 
+import { useTabBarStyle } from "@/components/navigation/use-tab-bar-style"
+
 const tabActive = "#5358ee"
 const tabInactive = "#595d69"
 
 export default function TabsLayout() {
+    const tabBarStyle = useTabBarStyle()
+
     return (
         <Tabs
             screenOptions={{
                 headerShown: false,
                 tabBarActiveTintColor: tabActive,
                 tabBarInactiveTintColor: tabInactive,
-                tabBarStyle: {
-                    backgroundColor: "#ffffff",
-                    borderTopColor: "#ebebeb",
-                    height: 60,
-                    paddingBottom: 8,
-                    paddingTop: 8,
-                },
+                tabBarStyle,
                 tabBarLabelStyle: {
                     fontSize: 11,
                     fontWeight: "500",

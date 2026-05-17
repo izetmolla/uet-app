@@ -4,6 +4,7 @@ import {
 } from "@react-navigation/drawer"
 import { type Href, useRouter } from "expo-router"
 import { Pressable } from "react-native"
+import { SafeAreaView } from "react-native-safe-area-context"
 
 import { Heading } from "@/components/ui/heading"
 import { Text } from "@/components/ui/text"
@@ -42,6 +43,7 @@ export function AppDrawerContent(props: DrawerContentComponentProps) {
     }
 
     return (
+        <SafeAreaView style={{ flex: 1 }} edges={["top", "left", "right", "bottom"]}>
         <DrawerContentScrollView
             {...props}
             contentContainerStyle={{ flex: 1 }}
@@ -81,5 +83,6 @@ export function AppDrawerContent(props: DrawerContentComponentProps) {
                 </Pressable>
             </VStack>
         </DrawerContentScrollView>
+        </SafeAreaView>
     )
 }

@@ -1,24 +1,16 @@
 import { type Href, useLocalSearchParams, useRouter } from "expo-router"
 import { useCallback, useEffect, useState } from "react"
-import {
-    ActivityIndicator,
-    Alert,
-    FlatList,
-    Pressable,
-    View,
-} from "react-native"
+import { ActivityIndicator, Alert, FlatList, Pressable } from "react-native"
 import { Image } from "expo-image"
-import {
-    ArrowDown,
-    ArrowUp,
-    ChevronLeft,
-    Plus,
-    Trash2,
-} from "lucide-react-native"
+import { ArrowDown, ArrowUp, Plus, Trash2 } from "lucide-react-native"
 
+import { AppHeader } from "@/components/navigation/app-header"
+import {
+    ScreenContentSafeArea,
+    ScreenSafeArea,
+} from "@/components/navigation/screen-safe-area"
 import { Box } from "@/components/ui/box"
 import { Button, ButtonIcon, ButtonText } from "@/components/ui/button"
-import { Heading } from "@/components/ui/heading"
 import { HStack } from "@/components/ui/hstack"
 import { Input, InputField } from "@/components/ui/input"
 import { Text } from "@/components/ui/text"
@@ -102,16 +94,29 @@ export default function CamscanEditScreen() {
 
     if (!item) {
         return (
-            <Box className="flex-1 items-center justify-center bg-background-50">
-                <Text className="text-typography-500">Collection not found</Text>
-                <Button
-                    variant="link"
-                    onPress={() => router.back()}
-                    className="mt-4"
-                >
-                    <ButtonText>Go back</ButtonText>
-                </Button>
-            </Box>
+            <ScreenSafeArea>
+                <AppHeader
+                    title="Edit collection"
+                    showBack
+                    showMenu={false}
+                    showSearch={false}
+                    showNotifications={false}
+                />
+                <ScreenContentSafeArea>
+                    <Box className="flex-1 items-center justify-center bg-background-50">
+                        <Text className="text-typography-500">
+                            Collection not found
+                        </Text>
+                        <Button
+                            variant="link"
+                            onPress={() => router.back()}
+                            className="mt-4"
+                        >
+                            <ButtonText>Go back</ButtonText>
+                        </Button>
+                    </Box>
+                </ScreenContentSafeArea>
+            </ScreenSafeArea>
         )
     }
 
@@ -166,21 +171,17 @@ export default function CamscanEditScreen() {
     )
 
     return (
-        <View style={{ flex: 1 }}>
-            <HStack className="items-center border-b border-outline-200 bg-background-0 px-2 py-2">
-                <Pressable
-                    onPress={() => router.back()}
-                    className="p-2"
-                    accessibilityLabel="Back"
-                >
-                    <ChevronLeft size={24} color="#1a1a1a" />
-                </Pressable>
-                <Heading size="md" className="flex-1 text-typography-900">
-                    Edit collection
-                </Heading>
-            </HStack>
-
+        <ScreenSafeArea>
+            <AppHeader
+                title="Edit collection"
+                showBack
+                showMenu={false}
+                showSearch={false}
+                showNotifications={false}
+            />
+            <ScreenContentSafeArea>
             <FlatList
+                className="flex-1 bg-background-50"
                 data={item.photos}
                 keyExtractor={(photo) => photo.id}
                 renderItem={renderPhoto}
@@ -253,6 +254,7 @@ export default function CamscanEditScreen() {
                     </Button>
                 }
             />
-        </View>
+            </ScreenContentSafeArea>
+        </ScreenSafeArea>
     )
 }
