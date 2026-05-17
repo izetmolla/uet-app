@@ -6,6 +6,7 @@ import {
     useState,
     type ReactNode,
 } from "react"
+import { StatusBar } from "expo-status-bar"
 
 import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider"
 
@@ -32,7 +33,10 @@ export function ColorModeProvider({ children }: { children: ReactNode }) {
 
     return (
         <ColorModeContext.Provider value={value}>
-            <GluestackUIProvider mode={colorMode}>{children}</GluestackUIProvider>
+            <GluestackUIProvider mode={colorMode}>
+                <StatusBar style={colorMode === "dark" ? "light" : "dark"} />
+                {children}
+            </GluestackUIProvider>
         </ColorModeContext.Provider>
     )
 }

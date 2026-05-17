@@ -10,6 +10,7 @@ export const brandColors = {
         mutedForeground: "89 93 105",
         mutedBackground: "239 242 245",
         border: "235 235 235",
+        pressed: "239 242 245",
         inputBorder: "224 224 224",
         borderHover: "204 204 204",
         primary: {
@@ -39,6 +40,11 @@ export const brandColors = {
         card: "12 15 24",
         foreground: "246 249 252",
         mutedForeground: "153 158 171",
+        mutedBackground: "33 38 95",
+        border: "48 53 139",
+        pressed: "33 38 95",
+        inputBorder: "62 66 182",
+        borderHover: "89 93 105",
     },
 } as const
 

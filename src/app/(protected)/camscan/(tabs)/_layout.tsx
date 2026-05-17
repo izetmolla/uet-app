@@ -1,20 +1,21 @@
 import { Tabs } from "expo-router"
 import { Camera, FolderOpen } from "lucide-react-native"
 
-import { useTabBarStyle } from "@/components/navigation/use-tab-bar-style"
-
-const tabActive = "#5358ee"
-const tabInactive = "#595d69"
+import {
+    useTabBarColors,
+    useTabBarStyle,
+} from "@/components/navigation/use-tab-bar-style"
 
 export default function CamscanTabsLayout() {
     const tabBarStyle = useTabBarStyle()
+    const { tabBarActiveTintColor, tabBarInactiveTintColor } = useTabBarColors()
 
     return (
         <Tabs
             screenOptions={{
                 headerShown: false,
-                tabBarActiveTintColor: tabActive,
-                tabBarInactiveTintColor: tabInactive,
+                tabBarActiveTintColor,
+                tabBarInactiveTintColor,
                 tabBarStyle,
                 tabBarLabelStyle: {
                     fontSize: 11,

@@ -6,6 +6,7 @@ import { type Href, useRouter } from "expo-router"
 import { Pressable } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 
+import { useThemeColors } from "@/hooks/use-theme-colors"
 import { Heading } from "@/components/ui/heading"
 import { Text } from "@/components/ui/text"
 import { VStack } from "@/components/ui/vstack"
@@ -31,6 +32,7 @@ export function AppDrawerContent(props: DrawerContentComponentProps) {
     const router = useRouter()
     const user = useAuthorizationStore((s) => s.user)
     const signOut = useAuthorizationStore((s) => s.signOut)
+    const colors = useThemeColors()
 
     const navigate = (href: Href) => {
         props.navigation.closeDrawer()
@@ -43,18 +45,27 @@ export function AppDrawerContent(props: DrawerContentComponentProps) {
     }
 
     return (
-        <SafeAreaView style={{ flex: 1 }} edges={["top", "left", "right", "bottom"]}>
+        <SafeAreaView
+            style={{ flex: 1, backgroundColor: colors.card }}
+            edges={["top", "left", "right", "bottom"]}
+        >
         <DrawerContentScrollView
             {...props}
             contentContainerStyle={{ flex: 1 }}
-            className="bg-background-0"
+            style={{ backgroundColor: colors.card }}
         >
             <VStack className="flex-1 px-4 py-4" space="lg">
                 <VStack space="xs">
-                    <Heading size="lg" className="text-typography-900">
+                    <Heading
+                        size="lg"
+                        style={{ color: colors.foreground }}
+                    >
                         UET App
                     </Heading>
-                    <Text size="sm" className="text-typography-500">
+                    <Text
+                        size="sm"
+                        style={{ color: colors.mutedForeground }}
+                    >
                         {user?.email}
                     </Text>
                 </VStack>
@@ -64,9 +75,19 @@ export function AppDrawerContent(props: DrawerContentComponentProps) {
                         <Pressable
                             key={link.label}
                             onPress={() => navigate(link.href)}
-                            className="rounded-lg px-3 py-3 active:bg-background-100"
+                            style={({ pressed }) => ({
+                                borderRadius: 8,
+                                paddingHorizontal: 12,
+                                paddingVertical: 12,
+                                backgroundColor: pressed
+                                    ? colors.pressed
+                                    : "transparent",
+                            })}
                         >
-                            <Text className="text-base text-typography-900">
+                            <Text
+                                className="text-base"
+                                style={{ color: colors.foreground }}
+                            >
                                 {link.label}
                             </Text>
                         </Pressable>
@@ -75,7 +96,14 @@ export function AppDrawerContent(props: DrawerContentComponentProps) {
 
                 <Pressable
                     onPress={handleSignOut}
-                    className="rounded-lg border border-outline-200 px-3 py-3 active:bg-error-50"
+                    style={({ pressed }) => ({
+                        borderRadius: 8,
+                        borderWidth: 1,
+                        borderColor: colors.border,
+                        paddingHorizontal: 12,
+                        paddingVertical: 12,
+                        backgroundColor: pressed ? colors.pressed : "transparent",
+                    })}
                 >
                     <Text className="text-center text-base text-error-600">
                         Sign out

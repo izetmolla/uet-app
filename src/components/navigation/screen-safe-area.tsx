@@ -5,6 +5,8 @@ import {
     type Edge,
 } from "react-native-safe-area-context"
 
+import { useThemeColors } from "@/hooks/use-theme-colors"
+
 const styles = StyleSheet.create({
     flex: { flex: 1 },
 })
@@ -19,8 +21,13 @@ export function ScreenSafeArea({
     children,
     edges = ["top", "left", "right"],
 }: ScreenSafeAreaProps) {
+    const colors = useThemeColors()
+
     return (
-        <SafeAreaView style={styles.flex} edges={edges}>
+        <SafeAreaView
+            style={[styles.flex, { backgroundColor: colors.card }]}
+            edges={edges}
+        >
             {children}
         </SafeAreaView>
     )
