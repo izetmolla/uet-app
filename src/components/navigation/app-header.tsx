@@ -6,6 +6,7 @@ import {
     Bell,
     Menu,
     Search,
+    Settings,
 } from "lucide-react-native"
 
 import { useThemeColors } from "@/hooks/use-theme-colors"
@@ -18,6 +19,7 @@ type AppHeaderProps = {
     showBack?: boolean
     showMenu?: boolean
     showSearch?: boolean
+    showSettings?: boolean
     showNotifications?: boolean
 }
 
@@ -26,6 +28,7 @@ export function AppHeader({
     showBack = false,
     showMenu = true,
     showSearch = true,
+    showSettings = true,
     showNotifications = true,
 }: AppHeaderProps) {
     const router = useRouter()
@@ -40,6 +43,10 @@ export function AppHeader({
         styles.iconButton,
         { backgroundColor: pressed ? colors.pressed : "transparent" },
     ]
+
+    const rightActionCount =
+        (showSearch ? 1 : 0) + (showSettings ? 1 : 0) + (showNotifications ? 1 : 0)
+    const rightMinWidth = Math.max(88, rightActionCount * 40)
 
     return (
         <Box
@@ -82,7 +89,10 @@ export function AppHeader({
                     {title}
                 </Text>
 
-                <HStack className="min-w-[88px] items-center justify-end gap-1">
+                <HStack
+                    className="items-center justify-end gap-0.5"
+                    style={{ minWidth: rightMinWidth }}
+                >
                     {showSearch && (
                         <Pressable
                             onPress={() =>
@@ -93,6 +103,18 @@ export function AppHeader({
                             accessibilityLabel="Search"
                         >
                             <Search size={20} color={colors.mutedForeground} />
+                        </Pressable>
+                    )}
+                    {showSettings && (
+                        <Pressable
+                            onPress={() =>
+                                router.push("/settings" as Href)
+                            }
+                            style={({ pressed }) => iconButtonStyle(pressed)}
+                            accessibilityRole="button"
+                            accessibilityLabel="Settings"
+                        >
+                            <Settings size={20} color={colors.mutedForeground} />
                         </Pressable>
                     )}
                     {showNotifications && (

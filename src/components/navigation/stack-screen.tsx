@@ -11,6 +11,7 @@ type StackScreenProps = {
     title: string
     children: ReactNode
     showSearch?: boolean
+    showSettings?: boolean
     showNotifications?: boolean
 }
 
@@ -18,6 +19,7 @@ export function StackScreen({
     title,
     children,
     showSearch = false,
+    showSettings = false,
     showNotifications = false,
 }: StackScreenProps) {
     return (
@@ -27,6 +29,7 @@ export function StackScreen({
                 showBack
                 showMenu={false}
                 showSearch={showSearch}
+                showSettings={showSettings}
                 showNotifications={showNotifications}
             />
             <ScreenContentSafeArea>
