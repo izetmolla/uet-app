@@ -11,8 +11,6 @@ import {
 import { useColorScheme as useSystemColorScheme } from "react-native"
 import { StatusBar } from "expo-status-bar"
 
-import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider"
-
 const THEME_STORAGE_KEY = "uet-app-theme-preference"
 
 export type ThemePreference = "system" | "light" | "dark"
@@ -92,10 +90,8 @@ export function ColorModeProvider({ children }: { children: ReactNode }) {
 
     return (
         <ColorModeContext.Provider value={value}>
-            <GluestackUIProvider mode={colorMode}>
-                <StatusBar style={colorMode === "dark" ? "light" : "dark"} />
-                {children}
-            </GluestackUIProvider>
+            <StatusBar style={colorMode === "dark" ? "light" : "dark"} />
+            {children}
         </ColorModeContext.Provider>
     )
 }

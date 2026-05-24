@@ -3,10 +3,11 @@ import * as SplashScreen from "expo-splash-screen"
 import { GestureHandlerRootView } from "react-native-gesture-handler"
 import { SafeAreaProvider } from "react-native-safe-area-context"
 
-import "@/global.css"
-import "@/lib/network/interceptors"
+import Providers from "@/components/providers"
 import { SplashScreenController } from "@/components/splash-screen-controller"
 import { ColorModeProvider } from "@/contexts/color-mode"
+import "@/global.css"
+import "@/lib/network/interceptors"
 
 SplashScreen.setOptions({
     duration: 400,
@@ -18,8 +19,10 @@ export default function RootLayout() {
         <GestureHandlerRootView style={{ flex: 1 }}>
             <SafeAreaProvider>
                 <ColorModeProvider>
-                    <SplashScreenController />
-                    <Stack screenOptions={{ headerShown: false }} />
+                    <Providers>
+                        <SplashScreenController />
+                        <Stack screenOptions={{ headerShown: false }} />
+                    </Providers>
                 </ColorModeProvider>
             </SafeAreaProvider>
         </GestureHandlerRootView>
