@@ -7,8 +7,8 @@
  *
  *   1. Importing it triggers the `./interceptors` side effect that
  *      wires the auth pipeline onto `BaseService`. Every consumer
- *      already imports something from `@workspace/flowtrove/lib/network`,
- *      so the side effect is guaranteed to run.
+ *      already imports something from `@/lib/network`, so the side
+ *      effect is guaranteed to run.
  *   2. It preserves the historical import surface so downstream apps
  *      keep working without per-file changes.
  */
@@ -29,12 +29,18 @@ export {
 } from "./jwt"
 export { BaseService } from "./client"
 export { refreshAccessToken } from "./refresh"
-export type { ResponseWithError, ResponseWithPagination } from "./api-service"
+export type { ResponseWithError, ResponseWithPagination, UploadFile } from "./api-service"
 export {
     getApiErrorMessageFromBody,
     getRequestErrorMessage,
     isApiErrorBody,
     withError,
 } from "./errors"
+export { type WithPagination, withAPI } from "./helpers"
+export { queryClient } from "./query-client"
+export {
+    registerNetworkErrorToast,
+    showNetworkErrorToast,
+} from "./toast-bridge"
 
 export default ApiService

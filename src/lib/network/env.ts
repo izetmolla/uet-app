@@ -1,8 +1,8 @@
 /**
- * Runtime environment helpers. Kept apart from the axios client so
- * tests can import them without booting the full network stack and
- * so they can be tweaked in one place when the embedding strategy
- * changes (e.g. when an SSR shell starts injecting `__GLOBAL_DATA__`).
+ * Runtime environment helpers for React Native / Expo.
+ *
+ * Kept apart from the axios client so tests can import them without
+ * booting the full network stack.
  */
 
 /**
@@ -12,21 +12,18 @@
  */
 export const exceptedPaths: string[] = []
 
+const DEFAULT_API_URL = "https://uet.izetmolla.com/api"
 
 /**
- * Builds the absolute base URL the API client should use. The "app"
- * service lives at the origin root; everything else is sandboxed
- * under `/<service>`.
+ * Builds the absolute base URL the API client should use.
+ * Override via `EXPO_PUBLIC_API_URL` in app config or `.env`.
  */
 export function baseApiURL(): string {
-    return `https://uet.izetmolla.com/api`
+    const configured = process.env.EXPO_PUBLIC_API_URL?.trim()
+    return configured && configured.length > 0 ? configured : DEFAULT_API_URL
 }
 
-/**
- * `process.env.NODE_ENV` access wrapped so it can't blow up in a CJS
- * test runner that doesn't expose `process.env`. The function form
- * also lets tests stub it out via `vi.spyOn` if they need to.
- */
+/** Expo / React Native dev flag. */
 export function isDev(): boolean {
-    return process.env.NODE_ENV === "development"
+    return __DEV__
 }

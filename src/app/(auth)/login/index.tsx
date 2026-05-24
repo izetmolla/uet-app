@@ -33,6 +33,7 @@ import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
 import { useAppToast } from "@/hooks/use-app-toast";
 import { getRequestErrorMessage } from "@/lib/network";
+import useAuthorizationStore from "@/store/authorization";
 import { useMutation } from "@tanstack/react-query";
 
 
@@ -44,7 +45,7 @@ const show2fields = true;
 export default function LoginScreen() {
     const { showError } = useAppToast()
     const router = useRouter()
-    // const signInUser = useAuthorizationStore((s) => s.signInUser)
+    const signInUser = useAuthorizationStore((s) => s.signInUser)
     const [passwordVisible, setPasswordVisible] = useState(false)
 
 
@@ -64,7 +65,15 @@ export default function LoginScreen() {
     const mutation = useMutation({
         mutationFn: signIn,
         onSuccess: (data) => {
-          console.log(data);
+            if (data.user && data.tokens) {
+                signInUser({ user: data.user, tokens: data.tokens })
+                router.replace("/")
+            } else {
+                showError({
+                    title: "Sign in failed",
+                    description: "Unable to sign in. Please try again.",
+                })
+            }
         },
         onError: (error) => {
             showError({

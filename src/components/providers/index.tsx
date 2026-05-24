@@ -2,7 +2,7 @@ import { QueryClientProvider } from "@tanstack/react-query"
 
 import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider"
 import { useColorMode } from "@/contexts/color-mode"
-import { queryClient } from "@/lib/network/query-client"
+import { queryClient } from "@/lib/network"
 
 import { AppToastProvider } from "./app-toast-provider"
 

@@ -6,12 +6,15 @@ import {
     type ReactNode,
 } from "react"
 
+import { useEffect } from "react"
+
 import {
     Toast,
     ToastDescription,
     ToastTitle,
     useToast,
 } from "@/components/ui/toast"
+import { registerNetworkErrorToast } from "@/lib/network/toast-bridge"
 
 export type AppToastStatus = "error" | "info" | "warning" | "success"
 
@@ -69,6 +72,16 @@ export function AppToastProvider({ children }: { children: ReactNode }) {
         }),
         [show]
     )
+
+    useEffect(() => {
+        registerNetworkErrorToast((message) => {
+            show("error", { title: message })
+        })
+
+        return () => {
+            registerNetworkErrorToast(null)
+        }
+    }, [show])
 
     return (
         <AppToastContext.Provider value={value}>

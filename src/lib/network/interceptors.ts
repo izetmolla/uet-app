@@ -2,14 +2,12 @@
  * Wires the request and response interceptors onto `BaseService`.
  *
  * Importing this module is the SIDE EFFECT that activates the auth
- * pipeline. The barrel re-export in `../network.ts` triggers it,
+ * pipeline. The barrel re-export in `./index.ts` triggers it,
  * which is why every consumer of the package gets the configured
  * client transparently.
  */
 
 import type { AxiosError } from "axios"
-
-import { toast } from "sonner"
 
 import useAuthorizationStore from "../../store/authorization-store"
 
@@ -22,6 +20,7 @@ import {
 import { isDev } from "./env"
 import { isAccessTokenStale } from "./jwt"
 import { applyAuthHeader, refreshAccessToken, type RetryableConfig } from "./refresh"
+import { showNetworkErrorToast } from "./toast-bridge"
 
 /**
  * Reads the optional `code` field from a JSON error envelope. The
@@ -39,24 +38,26 @@ function getResponseCode(data: unknown): string | undefined {
 /**
  * Performs a hard sign-out on the client: clears the local store and
  * surfaces a single toast. The backend session is invalidated by the
- * dedicated `/api/authorization/sign-out` endpoint, which is fired
- * separately from the store and tolerates a missing session.
+ * dedicated sign-out endpoint, which is fired separately from the
+ * store and tolerates a missing session.
  */
 function forceSignOut(message?: string): void {
     const { signOut } = useAuthorizationStore.getState()
     signOut()
     if (message) {
-        toast.error(message)
+        showNetworkErrorToast(message)
     }
+}
+
+/** User is signed in but lacks rights; show the app unauthorized page, keep session. */
+function showUnauthorizedPage(): void {
+    useAuthorizationStore.getState().setAccessDenied(true)
 }
 
 BaseService.interceptors.request.use(
     async (config) => {
         const cfg = config as RetryableConfig
 
-        // The refresh request brings its own Authorization header
-        // (the refresh token) and must skip the rest of the auth
-        // pipeline; otherwise we'd recurse into refreshAccessToken().
         if (cfg._isRefresh) {
             return config
         }
@@ -65,10 +66,6 @@ BaseService.interceptors.request.use(
         const accessToken = tokens?.access_token ?? ""
         const refreshToken = tokens?.refresh_token ?? ""
 
-        // The reauthorize header (`cra`) is set when we have neither a
-        // valid access nor refresh token, so the server can hand back
-        // refreshed credentials in-band for protected endpoints that
-        // support it.
         if (!accessToken && !refreshToken) {
             config.headers["cra"] = "t"
             return config
@@ -88,10 +85,6 @@ BaseService.interceptors.request.use(
             }
         }
 
-        // Last resort: send the (possibly expired) access token. The
-        // response interceptor will pick up the 401 and either retry
-        // once after a fresh refresh or, if that also fails, sign the
-        // user out cleanly.
         if (accessToken) {
             applyAuthHeader(config, accessToken)
         }
@@ -109,8 +102,6 @@ BaseService.interceptors.response.use(
                 tokens: response?.data?.tokens,
             })
             const cfg = response.config as RetryableConfig
-            // Guard against an infinite loop in case the server keeps
-            // setting `reauthorize: true` on every response.
             if (!cfg._authRetried) {
                 cfg._authRetried = true
                 return BaseService(cfg)
@@ -122,32 +113,25 @@ BaseService.interceptors.response.use(
         const response = error.response
         const cfg = error.config as RetryableConfig | undefined
 
-        // Refresh requests own their own error handling; let the
-        // caller decide what to do. Forcing sign-out from inside the
-        // response interceptor on a refresh failure would race with
-        // the original request's retry logic.
         if (cfg?._isRefresh) {
             return Promise.reject(error)
         }
 
         if (!response) {
-            // Network error / timeout / cancellation. NEVER sign out
-            // here: the user is still authenticated, they just lost
-            // connectivity. Letting the caller see the original error
-            // is enough.
             return Promise.reject(error)
         }
 
         const status = response.status
         const code = getResponseCode(response.data)
+        const { isSignedIn } = useAuthorizationStore.getState()
 
-        // Permission failures are not auth failures. The user IS
-        // signed in, they simply don't have rights for this resource.
-        // Bail out without touching the session.
-        if (code && PERMISSION_CODES.has(code)) {
-            return Promise.reject(error)
-        }
-        if (status === 403) {
+        const isAccessDenied =
+            (code !== undefined && PERMISSION_CODES.has(code)) ||
+            status === 403 ||
+            (isSignedIn && code === "UNAUTHORIZED")
+
+        if (isAccessDenied) {
+            showUnauthorizedPage()
             return Promise.reject(error)
         }
 
@@ -155,9 +139,6 @@ BaseService.interceptors.response.use(
             const isRefreshable = !code || REFRESHABLE_AUTH_CODES.has(code)
             const isFatal = code !== undefined && FATAL_AUTH_CODES.has(code)
 
-            // One retry only. If we already attempted to refresh and
-            // the second 401 came back, we know the refresh token is
-            // dead too and we have to re-authenticate.
             if (cfg && isRefreshable && !isFatal && !cfg._authRetried) {
                 const { tokens } = useAuthorizationStore.getState()
                 const refreshToken = tokens?.refresh_token ?? ""
@@ -171,8 +152,6 @@ BaseService.interceptors.response.use(
                 }
             }
 
-            // No refresh token, refresh failed, fatal code, or this is
-            // the second 401 in a row: the session is genuinely gone.
             forceSignOut(
                 code === "INVALID_CREDENTIALS"
                     ? "Invalid credentials"

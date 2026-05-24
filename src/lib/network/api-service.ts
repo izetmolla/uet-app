@@ -1,21 +1,13 @@
 /**
  * High-level convenience API on top of the configured `BaseService`.
  *
- * `ApiService` wraps the raw axios client with three thin helpers
- * shaped around the patterns this codebase uses everywhere:
+ * `ApiService` wraps the raw axios client with thin helpers shaped
+ * around the patterns this codebase uses everywhere:
  *
- *   - `fetchData`        - call an endpoint and resolve to the full
- *                          AxiosResponse so the caller can inspect
- *                          headers/status.
- *   - `fetchDataBody`    - same, but resolves to just `response.data`
- *                          for the common case where the body is
- *                          everything you care about.
- *   - `uploadFileData`   - multipart upload helper with progress and
- *                          structured success/error callbacks.
- *
- * The shape of `ResponseWithError` and `ResponseWithPagination` is
- * dictated by the backend's response envelope; keeping them next to
- * the service keeps the contract centralized.
+ *   - `fetchData`        - call an endpoint and resolve to the JSON body
+ *   - `fetchDataBody`    - alias of `fetchData`
+ *   - `fetchDataResponse` - full AxiosResponse when headers/status matter
+ *   - `uploadFileData`   - multipart upload helper with progress callbacks
  */
 
 import type {
@@ -53,10 +45,41 @@ export interface ResponseWithPagination<T> extends ResponseWithError {
     }
 }
 
+/** Web `File` or React Native `{ uri, name, type }` upload payload. */
+export type UploadFile =
+    | File
+    | {
+          uri: string
+          name: string
+          type: string
+      }
+
 const ApiService = {
     fetchData<Response = unknown, Request = Record<string, unknown>>(
         param: AxiosRequestConfig<Request>,
-    ) {
+    ): Promise<Response> {
+        return new Promise<Response>((resolve, reject) => {
+            BaseService(param)
+                .then((response: AxiosResponse<Response>) => {
+                    resolve(response.data)
+                })
+                .catch((errors: AxiosError) => {
+                    reject(errors)
+                })
+        })
+    },
+
+    /** Alias of `fetchData` — resolves to the JSON response body. */
+    fetchDataBody<Response = unknown, Request = Record<string, unknown>>(
+        param: AxiosRequestConfig<Request>,
+    ): Promise<Response> {
+        return this.fetchData<Response, Request>(param)
+    },
+
+    /** Full Axios response (headers, status, etc.). */
+    fetchDataResponse<Response = unknown, Request = Record<string, unknown>>(
+        param: AxiosRequestConfig<Request>,
+    ): Promise<AxiosResponse<Response>> {
         return new Promise<AxiosResponse<Response>>((resolve, reject) => {
             BaseService(param)
                 .then((response: AxiosResponse<Response>) => {
@@ -68,17 +91,9 @@ const ApiService = {
         })
     },
 
-    /** Same as fetchData but resolves to `response.data` (typed body). */
-    async fetchDataBody<Response = unknown, Request = Record<string, unknown>>(
-        param: AxiosRequestConfig<Request>,
-    ): Promise<Response> {
-        const r = await this.fetchData<Response, Request>(param)
-        return r.data
-    },
-
     uploadFileData<Response = unknown, Request = Record<string, unknown>>(
         path: string,
-        file: File,
+        file: UploadFile,
         options?: {
             body?: Request
             onUploadProgress?: (progressEvent: AxiosProgressEvent) => void
@@ -86,10 +101,16 @@ const ApiService = {
             onError?: (error: ResponseWithError) => void
         },
     ) {
-        return new Promise<AxiosResponse<Response>>(async (resolve, reject) => {
+        return new Promise<Response>(async (resolve, reject) => {
             try {
                 const formData = new FormData()
-                formData.append("file", file)
+
+                if ("uri" in file) {
+                    formData.append("file", file as unknown as Blob)
+                } else {
+                    formData.append("file", file)
+                }
+
                 if (options?.body) {
                     formData.append("body", JSON.stringify(options.body))
                 }
@@ -98,25 +119,24 @@ const ApiService = {
                     headers: {
                         "Content-Type": "multipart/form-data",
                     },
-                    ...(options && options.onUploadProgress
+                    ...(options?.onUploadProgress
                         ? { onUploadProgress: options.onUploadProgress }
                         : {}),
                 })
 
                 if (uploaded?.data?.error) {
-                    if (options?.onError) options.onError(uploaded.data.error)
+                    options?.onError?.(uploaded.data.error)
                 } else {
-                    if (options?.onFinish) options.onFinish(uploaded.data)
+                    options?.onFinish?.(uploaded.data)
                 }
                 resolve(uploaded.data)
             } catch (error) {
-                if (options?.onError)
-                    options.onError({
-                        message: (error as AxiosError).message,
-                        error: true,
-                        code: "UPLOAD_FAILED",
-                        details: { field: "file" },
-                    })
+                options?.onError?.({
+                    message: (error as AxiosError).message,
+                    error: true,
+                    code: "UPLOAD_FAILED",
+                    details: { field: "file" },
+                })
                 reject(error)
             }
         })
