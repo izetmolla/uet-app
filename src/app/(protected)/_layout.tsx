@@ -3,7 +3,7 @@ import { Drawer } from "expo-router/drawer"
 import { View } from "react-native"
 
 import { AppDrawerContent } from "@/components/navigation/app-drawer-content"
-import useAuthorizationStore from "@/store/authorization"
+import useAuthorizationStore from "@/store/authorization-store"
 
 const hiddenDrawerItem = { drawerItemStyle: { display: "none" as const } }
 
@@ -44,7 +44,8 @@ export default function ProtectedLayout() {
                 options={hiddenDrawerItem}
             />
             <Drawer.Screen name="settings" options={hiddenDrawerItem} />
-            <Drawer.Screen name="camscan" options={{ title: "Camscan" }} />
+            {/* <Drawer.Screen name="camscan" options={{ title: "Camscan" }} /> */}
+            <Drawer.Screen name="scan-documents" options={{ title: "Scan Documents" }} />
         </Drawer>
     )
 }

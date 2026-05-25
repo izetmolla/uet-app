@@ -12,7 +12,7 @@
  */
 export const exceptedPaths: string[] = []
 
-const DEFAULT_API_URL = "https://uet.izetmolla.com/api"
+const DEFAULT_API_URL = __DEV__ ?"https://uet-dev.izetmolla.com/api" : "https://uet.izetmolla.com/api"
 
 /**
  * Builds the absolute base URL the API client should use.

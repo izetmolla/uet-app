@@ -1,6 +1,6 @@
 import { type Href, useRouter } from "expo-router"
-import { Pressable } from "react-native"
 import { ChevronRight } from "lucide-react-native"
+import { Pressable } from "react-native"
 
 import { TabPage } from "@/components/navigation/tab-page"
 import { Box } from "@/components/ui/box"
@@ -17,25 +17,30 @@ type QuickLink = {
 }
 
 const quickLinks: QuickLink[] = [
-    {
-        title: "Announcements",
-        description: "University news and alerts",
-        href: "/announcements" as Href,
-    },
-    {
-        title: "Course details",
-        description: "Syllabus, materials, and grades",
-        href: "/course-details" as Href,
-    },
-    {
-        title: "Campus services",
-        description: "Library, transport, and support",
-        href: "/campus-services" as Href,
-    },
+    // {
+    //     title: "Announcements",
+    //     description: "University news and alerts",
+    //     href: "/announcements" as Href,
+    // },
+    // {
+    //     title: "Course details",
+    //     description: "Syllabus, materials, and grades",
+    //     href: "/course-details" as Href,
+    // },
+    // {
+    //     title: "Campus services",
+    //     description: "Library, transport, and support",
+    //     href: "/campus-services" as Href,
+    // },
     {
         title: "Camscan",
         description: "Scan documents and manage collections",
         href: "/camscan" as Href,
+    },
+    {
+        title: "Skanimet",
+        description: "Scan documents and manage collections",
+        href: "/scan-documents" as Href,
     },
 ]
 
