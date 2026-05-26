@@ -1,6 +1,6 @@
+import AsyncStorage from "@react-native-async-storage/async-storage"
 import { create } from "zustand"
 import { createJSONStorage, persist } from "zustand/middleware"
-import AsyncStorage from "@react-native-async-storage/async-storage"
 
 import {
     createId,
@@ -12,7 +12,7 @@ import type { CamscanItem, CamscanPhoto } from "@/types/camscan"
 
 type CamscanState = {
     items: CamscanItem[]
-    createItemFromScan: (sourceUris: string[], title?: string) => Promise<string>
+    createItemFromScan: (sourceUris: string[], title?: string, student_id?: string) => Promise<string>
     addPhotosToItem: (itemId: string, sourceUris: string[]) => Promise<void>
     updateItemTitle: (itemId: string, title: string) => void
     reorderPhotos: (itemId: string, fromIndex: number, toIndex: number) => void
@@ -30,8 +30,8 @@ export const useCamscanStore = create<CamscanState>()(
         (set, get) => ({
             items: [],
 
-            createItemFromScan: async (sourceUris, title) => {
-                const id = createId()
+            createItemFromScan: async (sourceUris, title, student_id) => {
+                const id = student_id ?student_id : createId()
                 const now = new Date().toISOString()
                 const persistedUris = await persistScannedImages(id, sourceUris)
                 const photos: CamscanPhoto[] = persistedUris.map((uri) => ({

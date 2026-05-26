@@ -34,12 +34,8 @@ export function StudentTabShell({
 
     const openSettings = useCallback(() => {
         router.push({
-            pathname:
-                "/scan-documents/students/[folder_id]/[student_id]/settings",
+            pathname: "/scan-documents/students/settings",
             params: {
-                folder_id: getRouteParam(params.folder_id) ?? "",
-                student_id: getRouteParam(params.student_id) ?? "",
-                folder_name: getRouteParam(params.folder_name),
                 student_name: getRouteParam(params.student_name),
             },
         } as Href)

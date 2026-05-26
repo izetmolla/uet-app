@@ -1,40 +1,21 @@
-import { useLocalSearchParams } from "expo-router"
-import { Camera } from "lucide-react-native"
 
-import { Box } from "@/components/ui/box"
-import { Heading } from "@/components/ui/heading"
-import { Text } from "@/components/ui/text"
-import { VStack } from "@/components/ui/vstack"
-import { useThemeColors } from "@/hooks/use-theme-colors"
-
-import {
-    getRouteParam,
-    StudentTabShell,
-} from "@/components/scan-documents/student-tab-shell"
+import { StudentTabShell } from "@/components/scan-documents/student-tab-shell"
+import CamscanOption1Screen from "@/components/scanner/option1"
+import { useStudentScannerParams } from "@/components/scanner/use-student-scanner-params"
+import { useCamscanStore } from "@/store/camscan-store"
+import { useEffect } from "react"
 
 export default function StudentScanNowScreen() {
-    const { student_name } = useLocalSearchParams<{
-        student_name?: string | string[]
-    }>()
-    const title = getRouteParam(student_name) ?? "Student"
-    const { mutedForeground } = useThemeColors()
+    const { student_id, studentName } = useStudentScannerParams()
+    const title = studentName
+    const createItemFromScan = useCamscanStore((s) => s.createItemFromScan)
+    useEffect(() => {
+        createItemFromScan([], title, student_id)
+    }, [createItemFromScan, title, student_id])
 
     return (
         <StudentTabShell title={title}>
-            <VStack className="flex-1 items-center justify-center px-6 py-16">
-                <Box className="mb-4 rounded-full bg-background-muted p-5">
-                    <Camera size={32} color={mutedForeground} />
-                </Box>
-                <Heading
-                    size="md"
-                    className="text-center text-typography-900"
-                >
-                    Scan Now
-                </Heading>
-                <Text className="mt-2 text-center text-typography-500">
-                    Scan documents for this student.
-                </Text>
-            </VStack>
+           <CamscanOption1Screen student_id={student_id}/>
         </StudentTabShell>
     )
 }

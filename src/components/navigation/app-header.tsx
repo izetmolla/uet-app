@@ -4,6 +4,7 @@ import { Pressable, StyleSheet } from "react-native"
 import {
     ArrowLeft,
     Bell,
+    FileDown,
     Menu,
     Search,
     Settings,
@@ -22,6 +23,8 @@ type AppHeaderProps = {
     showSettings?: boolean
     showNotifications?: boolean
     onSettingsPress?: () => void
+    onExportPdfPress?: () => void
+    exportPdfDisabled?: boolean
 }
 
 export function AppHeader({
@@ -32,6 +35,8 @@ export function AppHeader({
     showSettings = true,
     showNotifications = true,
     onSettingsPress,
+    onExportPdfPress,
+    exportPdfDisabled = false,
 }: AppHeaderProps) {
     const router = useRouter()
     const navigation = useNavigation()
@@ -47,7 +52,10 @@ export function AppHeader({
     ]
 
     const rightActionCount =
-        (showSearch ? 1 : 0) + (showSettings ? 1 : 0) + (showNotifications ? 1 : 0)
+        (showSearch ? 1 : 0) +
+        (onExportPdfPress ? 1 : 0) +
+        (showSettings ? 1 : 0) +
+        (showNotifications ? 1 : 0)
     const rightMinWidth = Math.max(88, rightActionCount * 40)
 
     return (
@@ -107,6 +115,20 @@ export function AppHeader({
                             <Search size={20} color={colors.mutedForeground} />
                         </Pressable>
                     )}
+                    {onExportPdfPress ? (
+                        <Pressable
+                            onPress={onExportPdfPress}
+                            disabled={exportPdfDisabled}
+                            style={({ pressed }) => [
+                                iconButtonStyle(pressed),
+                                exportPdfDisabled && { opacity: 0.4 },
+                            ]}
+                            accessibilityRole="button"
+                            accessibilityLabel="Export collection as PDF"
+                        >
+                            <FileDown size={20} color={colors.mutedForeground} />
+                        </Pressable>
+                    ) : null}
                     {showSettings && (
                         <Pressable
                             onPress={
