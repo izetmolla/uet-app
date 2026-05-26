@@ -3,6 +3,7 @@ import ApiService from "@/lib/network"
 export type ScanDocumentFolder = {
     id: string
     name: string
+    students: number
 }
 
 export interface ScanDocumentsFoldersResponse {

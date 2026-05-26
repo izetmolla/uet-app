@@ -3,7 +3,7 @@ import ApiService from "@/lib/network"
 export type Student = {
     id: string
     fullname?: string
-    personal_id?: string
+    id_number?: string
     image?: string
     email?: string
     study_program?: string

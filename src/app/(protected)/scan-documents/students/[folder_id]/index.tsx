@@ -1,9 +1,17 @@
 import { Image } from "expo-image"
-import { useLocalSearchParams } from "expo-router"
+import { type Href, useLocalSearchParams, useRouter } from "expo-router"
 import { ChevronRight, Search, User } from "lucide-react-native"
-import { useCallback, useMemo, useState } from "react"
-import { FlatList, Pressable, RefreshControl } from "react-native"
+import { useCallback, useMemo, useRef, useState } from "react"
+import {
+    FlatList,
+    type NativeScrollEvent,
+    type NativeSyntheticEvent,
+    Pressable,
+    RefreshControl,
+    StyleSheet,
+} from "react-native"
 
+import { type ScanDocumentsFoldersResponse } from "@/api/protected/scan-documents/tabs"
 import {
     getStudents,
     type Student,
@@ -22,7 +30,15 @@ import { Text } from "@/components/ui/text"
 import { VStack } from "@/components/ui/vstack"
 import { useThemeColors } from "@/hooks/use-theme-colors"
 import { withError } from "@/lib/network"
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
+
+function getRouteParam(
+    value: string | string[] | undefined
+): string | undefined {
+    if (typeof value === "string") return value
+    if (Array.isArray(value)) return value[0]
+    return undefined
+}
 
 function getInitials(name?: string) {
     if (!name?.trim()) return "?"
@@ -34,10 +50,13 @@ function getInitials(name?: string) {
         .join("")
 }
 
+/** Approximates VStack `space="md"` below the title block before the search bar. */
+const HEADER_TITLE_SEARCH_GAP = 12
+
 function matchesSearch(student: Student, query: string) {
     const haystack = [
         student.fullname,
-        student.personal_id,
+        student.id_number,
         student.email,
         student.study_program,
         student.study_year,
@@ -74,17 +93,18 @@ function StudentAvatar({ student }: { student: Student }) {
     )
 }
 
-function StudentRow({ student }: { student: Student }) {
-    const subtitle = [
-        student.personal_id,
-        student.study_program,
-        student.study_year ? `Year ${student.study_year}` : null,
-    ]
-        .filter(Boolean)
-        .join(" · ")
+function StudentRow({
+    student,
+    onPress,
+}: {
+    student: Student
+    onPress: () => void
+}) {
+    const idNumber = student.id_number?.trim() || "-"
 
     return (
         <Pressable
+            onPress={onPress}
             className="active:opacity-80"
             accessibilityRole="button"
             accessibilityLabel={student.fullname ?? "Student"}
@@ -99,24 +119,13 @@ function StudentRow({ student }: { student: Student }) {
                     >
                         {student.fullname ?? student.email ?? "Unknown student"}
                     </Text>
-                    {subtitle ? (
-                        <Text
-                            size="sm"
-                            className="text-typography-500"
-                            numberOfLines={2}
-                        >
-                            {subtitle}
-                        </Text>
-                    ) : null}
-                    {student.email && student.fullname ? (
-                        <Text
-                            size="xs"
-                            className="text-typography-400"
-                            numberOfLines={1}
-                        >
-                            {student.email}
-                        </Text>
-                    ) : null}
+                    <Text
+                        size="sm"
+                        className="text-typography-500"
+                        numberOfLines={1}
+                    >
+                        {idNumber}
+                    </Text>
                 </VStack>
 
                 <ChevronRight size={20} color="#8c8f98" />
@@ -151,19 +160,42 @@ function SearchBar({
 }
 
 export default function StudentsScreen() {
-    const { folder_id } = useLocalSearchParams<{ folder_id: string }>()
+    const router = useRouter()
+    const { folder_id, folder_name } = useLocalSearchParams<{
+        folder_id: string
+        folder_name?: string | string[]
+    }>()
+    const queryClient = useQueryClient()
+    const folderId = getRouteParam(folder_id) ?? ""
     const { primary, mutedForeground } = useThemeColors()
     const [search, setSearch] = useState("")
+    const [isSearchSticky, setIsSearchSticky] = useState(false)
+    const titleSectionHeightRef = useRef(0)
+    const searchBarHeightRef = useRef(0)
 
     const { data, isLoading, isRefetching, error, refetch } = useQuery({
-        queryKey: ["students", folder_id],
-        queryFn: () => getStudents({ folder_id: folder_id }),
-        enabled: Boolean(folder_id),
+        queryKey: ["students", folderId],
+        queryFn: () => getStudents({ folder_id: folderId }),
+        enabled: Boolean(folderId),
         initialData: { students: [] },
     })
 
     const students = data?.students ?? []
     const normalizedSearch = search.trim().toLowerCase()
+
+    const folderName = useMemo(() => {
+        const fromRoute = getRouteParam(folder_name)
+        if (fromRoute) return fromRoute
+
+        const foldersData =
+            queryClient.getQueryData<ScanDocumentsFoldersResponse>([
+                "scan-documents-tabs",
+            ])
+        return (
+            foldersData?.folders.find((folder) => folder.id === folderId)
+                ?.name ?? "Students"
+        )
+    }, [folder_name, folderId, queryClient])
 
     const filteredStudents = useMemo(() => {
         if (!normalizedSearch) return students
@@ -176,28 +208,79 @@ export default function StudentsScreen() {
         void refetch()
     }, [refetch])
 
+    const onTitleSectionLayout = useCallback(
+        (height: number) => {
+            titleSectionHeightRef.current = height
+        },
+        []
+    )
 
-  const listHeader = (
+    const onSearchBarLayout = useCallback((height: number) => {
+        if (height > 0) {
+            searchBarHeightRef.current = height
+        }
+    }, [])
+
+    const onScroll = useCallback(
+        (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+            const offsetY = event.nativeEvent.contentOffset.y
+            const shouldStick =
+                titleSectionHeightRef.current > 0 &&
+                offsetY >
+                    titleSectionHeightRef.current + HEADER_TITLE_SEARCH_GAP
+
+            setIsSearchSticky((prev) =>
+                prev === shouldStick ? prev : shouldStick
+            )
+        },
+        []
+    )
+
+    const listHeader = (
         <VStack space="md" className="pb-3 pt-1">
-            <VStack space="xs">
-                <Heading size="sm" className="text-typography-900">
-                    Students
-                </Heading>
+            <VStack
+                space="sm"
+                onLayout={(event) =>
+                    onTitleSectionLayout(event.nativeEvent.layout.height)
+                }
+            >
                 <Text size="sm" className="text-typography-500">
                     {students.length} student{students.length === 1 ? "" : "s"}
                     {normalizedSearch
                         ? ` · ${filteredStudents.length} shown`
                         : ""}
                 </Text>
+                <Heading
+                    size="sm"
+                    className="text-typography-900"
+                    numberOfLines={2}
+                >
+                    {folderName}
+                </Heading>
             </VStack>
-            <SearchBar value={search} onChangeText={setSearch} />
+            <Box
+                style={
+                    isSearchSticky && searchBarHeightRef.current > 0
+                        ? { height: searchBarHeightRef.current }
+                        : undefined
+                }
+                onLayout={(event) => {
+                    if (!isSearchSticky) {
+                        onSearchBarLayout(event.nativeEvent.layout.height)
+                    }
+                }}
+            >
+                {!isSearchSticky ? (
+                    <SearchBar value={search} onChangeText={setSearch} />
+                ) : null}
+            </Box>
         </VStack>
     )
 
     return (
         <ScreenSafeArea>
             <AppHeader
-                title="Students"
+                title={folderName}
                 showBack
                 showMenu={false}
                 showSearch={false}
@@ -210,6 +293,17 @@ export default function StudentsScreen() {
                         forMeta
                         error={withError(error, data)}
                     >
+                        {isSearchSticky ? (
+                            <Box
+                                className="absolute inset-x-0 top-0 z-10 border-b border-outline-200 bg-background-50 px-4 pb-3 pt-1"
+                                style={styles.stickySearch}
+                            >
+                                <SearchBar
+                                    value={search}
+                                    onChangeText={setSearch}
+                                />
+                            </Box>
+                        ) : null}
                         <FlatList
                             data={filteredStudents}
                             keyExtractor={(item) => item.id}
@@ -217,6 +311,8 @@ export default function StudentsScreen() {
                             contentContainerClassName="gap-3 px-4 pb-6 grow"
                             keyboardShouldPersistTaps="handled"
                             showsVerticalScrollIndicator={false}
+                            scrollEventThrottle={16}
+                            onScroll={onScroll}
                             refreshControl={
                                 <RefreshControl
                                     refreshing={isRefetching}
@@ -258,7 +354,20 @@ export default function StudentsScreen() {
                                 </VStack>
                             }
                             renderItem={({ item }) => (
-                                <StudentRow student={item} />
+                                <StudentRow
+                                    student={item}
+                                    onPress={() =>
+                                        router.push({
+                                            pathname:
+                                                "/scan-documents/students/[folder_id]/[student_id]",
+                                            params: {
+                                                folder_id: folderId,
+                                                student_id: item.id,
+                                                folder_name: folderName,
+                                            },
+                                        } as Href)
+                                    }
+                                />
                             )}
                         />
                     </ContentLoader>
@@ -267,3 +376,13 @@ export default function StudentsScreen() {
         </ScreenSafeArea>
     )
 }
+
+const styles = StyleSheet.create({
+    stickySearch: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.06,
+        shadowRadius: 3,
+        elevation: 2,
+    },
+})

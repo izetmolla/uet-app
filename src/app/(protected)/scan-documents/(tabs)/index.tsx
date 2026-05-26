@@ -30,7 +30,7 @@ function FolderRow({
             onPress={onPress}
             className="active:opacity-80"
             accessibilityRole="button"
-            accessibilityLabel={`Open folder ${folder.name}`}
+            accessibilityLabel={`Open folder ${folder.name}, ${folder.students} student${folder.students === 1 ? "" : "s"}`}
         >
             <HStack className="items-center gap-3 rounded-2xl border border-outline-200 bg-background-0 px-4 py-4 shadow-sm">
                 <Box className="h-12 w-12 items-center justify-center rounded-xl bg-primary-100">
@@ -48,6 +48,10 @@ function FolderRow({
                         Tap to scan documents
                     </Text>
                 </VStack>
+
+                <Text size="sm" className="text-typography-500">
+                    {folder.students}
+                </Text>
 
                 <ChevronRight size={20} color="#8c8f98" />
             </HStack>
@@ -71,7 +75,7 @@ export default function ScanDocumentsFoldersScreen() {
     }, [refetch])
 
 
-
+console.log(folders)
     return (
         <CamscanShell>
             <Box className="flex-1 bg-background-50">
@@ -136,7 +140,16 @@ export default function ScanDocumentsFoldersScreen() {
                         renderItem={({ item }) => (
                             <FolderRow
                                 folder={item}
-                                onPress={() => router.push(`/scan-documents/students/${item.id}` as Href)}
+                                onPress={() =>
+                                    router.push({
+                                        pathname:
+                                            "/scan-documents/students/[folder_id]",
+                                        params: {
+                                            folder_id: item.id,
+                                            folder_name: item.name,
+                                        },
+                                    } as Href)
+                                }
                             />
                         )}
                     />
