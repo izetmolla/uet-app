@@ -1,11 +1,10 @@
 import { Stack } from "expo-router"
 
-export default function ScanDocumentsLayout() {
+export default function StudentLayout() {
     return (
         <Stack screenOptions={{ headerShown: false }}>
             <Stack.Screen name="(tabs)" />
-            <Stack.Screen name="[id]" />
-            <Stack.Screen name="students/[folder_id]" />
+            <Stack.Screen name="settings" />
         </Stack>
     )
 }

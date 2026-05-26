@@ -364,6 +364,10 @@ export default function StudentsScreen() {
                                                 folder_id: folderId,
                                                 student_id: item.id,
                                                 folder_name: folderName,
+                                                student_name:
+                                                    item.fullname ??
+                                                    item.email ??
+                                                    "Student",
                                             },
                                         } as Href)
                                     }

@@ -21,6 +21,7 @@ type AppHeaderProps = {
     showSearch?: boolean
     showSettings?: boolean
     showNotifications?: boolean
+    onSettingsPress?: () => void
 }
 
 export function AppHeader({
@@ -30,6 +31,7 @@ export function AppHeader({
     showSearch = true,
     showSettings = true,
     showNotifications = true,
+    onSettingsPress,
 }: AppHeaderProps) {
     const router = useRouter()
     const navigation = useNavigation()
@@ -107,8 +109,9 @@ export function AppHeader({
                     )}
                     {showSettings && (
                         <Pressable
-                            onPress={() =>
-                                router.push("/settings" as Href)
+                            onPress={
+                                onSettingsPress ??
+                                (() => router.push("/settings" as Href))
                             }
                             style={({ pressed }) => iconButtonStyle(pressed)}
                             accessibilityRole="button"
