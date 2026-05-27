@@ -1,5 +1,5 @@
 import { type Href, router, Tabs, useLocalSearchParams } from "expo-router"
-import { ClipboardCheck, Scan } from "lucide-react-native"
+import { ClipboardCheck, Scan, Upload } from "lucide-react-native"
 import { useCallback } from "react"
 
 import { ScreenSafeArea } from "@/components/navigation/screen-safe-area"
@@ -95,13 +95,13 @@ export default function StudentTabsLayout() {
                         header: renderDocumentsHeader,
                     }}
                 />
-
                 <Tabs.Screen
                     name="scan-now"
                     options={{
                         title: "Add",
                         tabBarIcon: ({ color, size }) => (
                             <Scan color={color} size={size} />
+
                         ),
                     }}
                     listeners={{
@@ -118,6 +118,33 @@ export default function StudentTabsLayout() {
                         },
                     }}
                 />
+
+                <Tabs.Screen
+                    name="publish"
+                    options={{
+                        title: "Publish",
+                        tabBarIcon: ({ color, size }) => (
+                            <Upload color={color} size={size} />
+
+                        ),
+                    }}
+                    listeners={{
+                        tabPress: (e) => {
+                            e.preventDefault()
+                            router.push({
+                                pathname:
+                                    "/scan-documents/students/[folder_id]/[student_id]/publish-options",
+                                params: {
+                                    folder_id: getRouteParam(folder_id),
+                                    student_id: getRouteParam(student_id),
+                                    student_name: getRouteParam(student_name),
+                                },
+                            } as Href)
+                        },
+                    }}
+                />
+
+
                 <Tabs.Screen
                     name="check"
                     options={{

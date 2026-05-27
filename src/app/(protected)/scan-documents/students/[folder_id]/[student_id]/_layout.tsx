@@ -11,6 +11,17 @@ export default function StudentLayout() {
                     sheetAllowedDetents: [0.7],
                     sheetInitialDetentIndex: 0,
                     sheetGrabberVisible: true,
+                    headerShown: false,
+                }}
+            />
+            <Stack.Screen
+                name="publish-options"
+                options={{
+                    presentation: "formSheet",
+                    sheetAllowedDetents: [0.7],
+                    sheetInitialDetentIndex: 0,
+                    sheetGrabberVisible: true,
+                    headerShown: false,
                 }}
             />
         </Stack>
