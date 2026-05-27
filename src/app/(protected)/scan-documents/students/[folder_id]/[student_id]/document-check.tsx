@@ -1,16 +1,15 @@
 import { useLocalSearchParams } from "expo-router"
 import { ClipboardCheck } from "lucide-react-native"
 
+import {
+    getRouteParam,
+    StudentTabShell,
+} from "@/components/scan-documents/student-tab-shell"
 import { Box } from "@/components/ui/box"
 import { Heading } from "@/components/ui/heading"
 import { Text } from "@/components/ui/text"
 import { VStack } from "@/components/ui/vstack"
 import { useThemeColors } from "@/hooks/use-theme-colors"
-
-import {
-    getRouteParam,
-    StudentTabShell,
-} from "@/components/scan-documents/student-tab-shell"
 
 export default function StudentDocumentCheckScreen() {
     const { student_name } = useLocalSearchParams<{
