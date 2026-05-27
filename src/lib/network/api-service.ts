@@ -96,6 +96,7 @@ const ApiService = {
         file: UploadFile,
         options?: {
             body?: Request
+            signal?: AbortSignal
             onUploadProgress?: (progressEvent: AxiosProgressEvent) => void
             onFinish?: (data: Response) => void
             onError?: (error: ResponseWithError) => void
@@ -119,6 +120,7 @@ const ApiService = {
                     headers: {
                         "Content-Type": "multipart/form-data",
                     },
+                    ...(options?.signal ? { signal: options.signal } : {}),
                     ...(options?.onUploadProgress
                         ? { onUploadProgress: options.onUploadProgress }
                         : {}),

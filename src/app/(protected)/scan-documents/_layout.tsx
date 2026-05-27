@@ -6,7 +6,7 @@ export default function ScanDocumentsLayout() {
             <Stack.Screen name="index" />
             <Stack.Screen
                 name="students/camera/index"
-                options={{ orientation: "portrait" }}
+                options={{ orientation: "portrait_up" }}
             />
             <Stack.Screen name="students/[folder_id]" />
         </Stack>

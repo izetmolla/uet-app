@@ -30,6 +30,7 @@ const StudentDocumentsScreen = () => {
         <Box className="flex-1 bg-background-50">
             <StudentPhotosGallery
                 studentId={studentId}
+                folderId={getRouteParam(folder_id)}
                 onScanPress={openCamera}
             />
         </Box>

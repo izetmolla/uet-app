@@ -76,6 +76,7 @@ const ScanDocumentsCameraPreview = () => {
                     device={device}
                     isActive={isFocused}
                     outputs={[photoOutput]}
+                    orientationSource="interface"
                     resizeMode="cover"
                     enableNativeTapToFocusGesture={!isCapturing}
                     enableNativeZoomGesture={!isCapturing}

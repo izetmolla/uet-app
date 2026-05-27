@@ -1,7 +1,7 @@
 import { useRouter } from "expo-router"
 import { FileDown, Images, X } from "lucide-react-native"
 import { useCallback, useState } from "react"
-import { ActivityIndicator, Alert, Platform, Share } from "react-native"
+import { ActivityIndicator, Alert } from "react-native"
 
 import {
     HEADER_ICON_SIZE_LARGE,
@@ -11,23 +11,31 @@ import { Box } from "@/components/ui/box"
 import { Button, ButtonIcon, ButtonText } from "@/components/ui/button"
 import { HStack } from "@/components/ui/hstack"
 import { VStack } from "@/components/ui/vstack"
+import { useUploadPhotos } from "@/hooks/upload-photos"
 import { useThemeColors } from "@/hooks/use-theme-colors"
 import { exportCollectionToPdf } from "@/lib/camscan/export-collection-pdf"
 import type { ScanDocumentsPhoto } from "@/types/scan-documents"
 
 type PublishOptionsSheetProps = {
     title: string
+    studentId: string
+    folderId?: string
     photos: ScanDocumentsPhoto[]
 }
 
 export function PublishOptionsSheet({
     title,
+    studentId,
+    folderId,
     photos,
 }: PublishOptionsSheetProps) {
     const router = useRouter()
     const colors = useThemeColors()
     const [exportingPdf, setExportingPdf] = useState(false)
-    const [sharingPhotos, setSharingPhotos] = useState(false)
+    const { uploadPhotos } = useUploadPhotos({
+        studentId,
+        folderId,
+    })
 
     const close = useCallback(() => {
         router.back()
@@ -59,37 +67,16 @@ export function PublishOptionsSheet({
         }
     }, [ensureHasPhotos, exportingPdf, photos, title])
 
-    const handlePublishPhotos = useCallback(async () => {
-        if (!ensureHasPhotos() || sharingPhotos) return
+    const handlePublishPhotos = useCallback(() => {
+        if (!ensureHasPhotos()) return
 
-        setSharingPhotos(true)
-        try {
-            const uris = photos.map((photo) => photo.uri)
-
-            if (Platform.OS === "ios") {
-                await Share.share({
-                    title: `Photos — ${title}`,
-                    urls: uris,
-                })
-                return
-            }
-
-            await Share.share({
-                title: `Photos — ${title}`,
-                message: `${photos.length} photo(s) for ${title}`,
-                url: uris[0],
-            })
-        } catch {
-            Alert.alert(
-                "Share failed",
-                "Could not share photos. Please try again."
-            )
-        } finally {
-            setSharingPhotos(false)
+        const started = uploadPhotos(photos)
+        if (started) {
+            close()
         }
-    }, [ensureHasPhotos, photos, sharingPhotos, title])
+    }, [close, ensureHasPhotos, photos, uploadPhotos])
 
-    const busy = exportingPdf || sharingPhotos
+    const busy = exportingPdf
 
     return (
         <Box className="flex-1 bg-background-0">
@@ -131,14 +118,10 @@ export function PublishOptionsSheet({
                     isDisabled={busy}
                     className="min-h-14"
                 >
-                    {sharingPhotos ? (
-                        <ActivityIndicator color={colors.primary} />
-                    ) : (
-                        <>
-                            <ButtonIcon as={Images} />
-                            <ButtonText>Publish photos</ButtonText>
-                        </>
-                    )}
+                    <>
+                        <ButtonIcon as={Images} />
+                        <ButtonText>Publish photos</ButtonText>
+                    </>
                 </Button>
             </VStack>
         </Box>

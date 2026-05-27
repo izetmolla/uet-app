@@ -1,24 +1,43 @@
 import { useFocusEffect } from "@react-navigation/native"
 import * as ScreenOrientation from "expo-screen-orientation"
 import { useCallback } from "react"
+import { Platform } from "react-native"
 
-/** Locks the screen to portrait while focused; restores on blur. */
+async function lockPortraitUp() {
+    if (Platform.OS === "ios") {
+        await ScreenOrientation.lockPlatformAsync({
+            screenOrientationArrayIOS: [
+                ScreenOrientation.Orientation.PORTRAIT_UP,
+            ],
+        })
+        return
+    }
+
+    await ScreenOrientation.lockAsync(
+        ScreenOrientation.OrientationLock.PORTRAIT_UP
+    )
+}
+
+/** Locks the screen to portrait upright while focused; restores on blur. */
 export function useLockPortraitOrientation() {
     useFocusEffect(
         useCallback(() => {
-            const lock = async () => {
+            let cancelled = false
+
+            const applyLock = async () => {
                 try {
-                    await ScreenOrientation.lockAsync(
-                        ScreenOrientation.OrientationLock.PORTRAIT_UP
-                    )
+                    await lockPortraitUp()
                 } catch (error) {
-                    console.warn("Failed to lock screen orientation:", error)
+                    if (!cancelled) {
+                        console.warn("Failed to lock screen orientation:", error)
+                    }
                 }
             }
 
-            void lock()
+            void applyLock()
 
             return () => {
+                cancelled = true
                 void ScreenOrientation.unlockAsync().catch(() => {})
             }
         }, [])
