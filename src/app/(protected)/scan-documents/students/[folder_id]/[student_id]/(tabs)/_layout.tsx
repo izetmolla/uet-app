@@ -10,6 +10,7 @@ import {
 import { ScanDocumentsHeader } from "@/components/scan-documents/header"
 import { getRouteParam } from "@/components/scan-documents/student-tab-shell"
 import { useDisableDrawerSwipe } from "@/hooks/use-disable-drawer-swipe"
+import { useScanDocumentsStore } from "@/store/scan-documents"
 
 export default function StudentTabsLayout() {
     useDisableDrawerSwipe()
@@ -23,6 +24,10 @@ export default function StudentTabsLayout() {
     }>()
 
     const headerTitle = getRouteParam(student_name) ?? "Student"
+    const photosViewMode = useScanDocumentsStore((s) => s.photosViewMode)
+    const togglePhotosViewMode = useScanDocumentsStore(
+        (s) => s.togglePhotosViewMode
+    )
 
     const openSettings = useCallback(() => {
         router.push({
@@ -30,6 +35,28 @@ export default function StudentTabsLayout() {
             params: { student_name: getRouteParam(student_name) },
         } as Href)
     }, [student_name])
+
+    const renderDocumentsHeader = useCallback(
+        () => (
+            <ScanDocumentsHeader
+                title={headerTitle}
+                showBack
+                showMenu={false}
+                showSearch={false}
+                showSettings
+                showNotifications={false}
+                onSettingsPress={openSettings}
+                photosViewMode={photosViewMode}
+                onTogglePhotosViewMode={togglePhotosViewMode}
+            />
+        ),
+        [
+            headerTitle,
+            openSettings,
+            photosViewMode,
+            togglePhotosViewMode,
+        ]
+    )
 
     const renderHeader = useCallback(
         () => (
@@ -65,6 +92,7 @@ export default function StudentTabsLayout() {
                     name="index"
                     options={{
                         href: null,
+                        header: renderDocumentsHeader,
                     }}
                 />
 

@@ -7,10 +7,12 @@ import ScanDocumentsCameraPreview from "@/components/scan-documents/camera/previ
 import { getRouteParam } from "@/components/scan-documents/student-tab-shell"
 import { Box } from "@/components/ui/box"
 import { useDisableDrawerSwipe } from "@/hooks/use-disable-drawer-swipe"
+import { useLockPortraitOrientation } from "@/hooks/use-lock-portrait-orientation"
 import { SafeAreaView } from "react-native-safe-area-context"
 
 const ScanDocumentsCameraScreen = () => {
     useDisableDrawerSwipe()
+    useLockPortraitOrientation()
     const { student_id, student_name } = useLocalSearchParams<{
         student_id?: string | string[]
         student_name?: string | string[]

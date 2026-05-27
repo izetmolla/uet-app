@@ -4,16 +4,24 @@ import {
     ArrowLeft,
     Bell,
     FileDown,
+    LayoutGrid,
+    List,
     Menu,
     Search,
     Settings,
 } from "lucide-react-native"
-import { Pressable, StyleSheet } from "react-native"
 
 import { Box } from "@/components/ui/box"
 import { HStack } from "@/components/ui/hstack"
 import { Text } from "@/components/ui/text"
+import {
+    HEADER_ICON_BUTTON_SIZE,
+    HEADER_ICON_SIZE,
+    HEADER_ICON_SIZE_LARGE,
+    HeaderIconButton,
+} from "@/components/scan-documents/header/header-icon-button"
 import { useThemeColors } from "@/hooks/use-theme-colors"
+import type { PhotosViewMode } from "@/types/scan-documents"
 
 type ScanDocumentsHeaderProps = {
     title: string
@@ -25,6 +33,8 @@ type ScanDocumentsHeaderProps = {
     onSettingsPress?: () => void
     onExportPdfPress?: () => void
     exportPdfDisabled?: boolean
+    photosViewMode?: PhotosViewMode
+    onTogglePhotosViewMode?: () => void
 }
 
 export function ScanDocumentsHeader({
@@ -37,6 +47,8 @@ export function ScanDocumentsHeader({
     onSettingsPress,
     onExportPdfPress,
     exportPdfDisabled = false,
+    photosViewMode,
+    onTogglePhotosViewMode,
 }: ScanDocumentsHeaderProps) {
     const router = useRouter()
     const navigation = useNavigation()
@@ -46,17 +58,16 @@ export function ScanDocumentsHeader({
         navigation.dispatch(DrawerActions.openDrawer())
     }
 
-    const iconButtonStyle = (pressed: boolean) => [
-        styles.iconButton,
-        { backgroundColor: pressed ? colors.pressed : "transparent" },
-    ]
-
     const rightActionCount =
+        (onTogglePhotosViewMode ? 1 : 0) +
         (showSearch ? 1 : 0) +
         (onExportPdfPress ? 1 : 0) +
         (showSettings ? 1 : 0) +
         (showNotifications ? 1 : 0)
-    const rightMinWidth = Math.max(88, rightActionCount * 40)
+    const rightMinWidth = Math.max(
+        96,
+        rightActionCount * (HEADER_ICON_BUTTON_SIZE + 4)
+    )
 
     return (
         <Box
@@ -66,28 +77,38 @@ export function ScanDocumentsHeader({
             }}
             className="border-b"
         >
-            <HStack className="h-14 items-center justify-between px-4">
-                <HStack className="min-w-[88px] items-center gap-1">
+            <HStack className="h-14 items-center justify-between px-3">
+                <HStack
+                    className="items-center gap-0.5"
+                    style={{ minWidth: rightMinWidth }}
+                >
                     {showBack ? (
-                        <Pressable
+                        <HeaderIconButton
                             onPress={() => router.back()}
-                            style={({ pressed }) => iconButtonStyle(pressed)}
-                            accessibilityRole="button"
                             accessibilityLabel="Go back"
                         >
-                            <ArrowLeft size={22} color={colors.primary} />
-                        </Pressable>
+                            <ArrowLeft
+                                size={HEADER_ICON_SIZE_LARGE}
+                                color={colors.primary}
+                            />
+                        </HeaderIconButton>
                     ) : showMenu ? (
-                        <Pressable
+                        <HeaderIconButton
                             onPress={openDrawer}
-                            style={({ pressed }) => iconButtonStyle(pressed)}
-                            accessibilityRole="button"
                             accessibilityLabel="Open menu"
                         >
-                            <Menu size={22} color={colors.primary} />
-                        </Pressable>
+                            <Menu
+                                size={HEADER_ICON_SIZE_LARGE}
+                                color={colors.primary}
+                            />
+                        </HeaderIconButton>
                     ) : (
-                        <Box className="h-10 w-10" />
+                        <Box
+                            style={{
+                                width: HEADER_ICON_BUTTON_SIZE,
+                                height: HEADER_ICON_BUTTON_SIZE,
+                            }}
+                        />
                     )}
                 </HStack>
 
@@ -103,69 +124,82 @@ export function ScanDocumentsHeader({
                     className="items-center justify-end gap-0.5"
                     style={{ minWidth: rightMinWidth }}
                 >
-                    {showSearch && (
-                        <Pressable
+                    {onTogglePhotosViewMode ? (
+                        <HeaderIconButton
+                            onPress={onTogglePhotosViewMode}
+                            accessibilityLabel={
+                                photosViewMode === "grid"
+                                    ? "Switch to list view"
+                                    : "Switch to grid view"
+                            }
+                        >
+                            {photosViewMode === "grid" ? (
+                                <List
+                                    size={HEADER_ICON_SIZE}
+                                    color={colors.mutedForeground}
+                                />
+                            ) : (
+                                <LayoutGrid
+                                    size={HEADER_ICON_SIZE}
+                                    color={colors.mutedForeground}
+                                />
+                            )}
+                        </HeaderIconButton>
+                    ) : null}
+                    {showSearch ? (
+                        <HeaderIconButton
                             onPress={() =>
                                 router.push("/campus-services" as Href)
                             }
-                            style={({ pressed }) => iconButtonStyle(pressed)}
-                            accessibilityRole="button"
                             accessibilityLabel="Search"
                         >
-                            <Search size={20} color={colors.mutedForeground} />
-                        </Pressable>
-                    )}
+                            <Search
+                                size={HEADER_ICON_SIZE}
+                                color={colors.mutedForeground}
+                            />
+                        </HeaderIconButton>
+                    ) : null}
                     {onExportPdfPress ? (
-                        <Pressable
+                        <HeaderIconButton
                             onPress={onExportPdfPress}
                             disabled={exportPdfDisabled}
-                            style={({ pressed }) => [
-                                iconButtonStyle(pressed),
-                                exportPdfDisabled && { opacity: 0.4 },
-                            ]}
-                            accessibilityRole="button"
                             accessibilityLabel="Export collection as PDF"
                         >
-                            <FileDown size={20} color={colors.mutedForeground} />
-                        </Pressable>
+                            <FileDown
+                                size={HEADER_ICON_SIZE}
+                                color={colors.mutedForeground}
+                            />
+                        </HeaderIconButton>
                     ) : null}
-                    {showSettings && (
-                        <Pressable
+                    {showSettings ? (
+                        <HeaderIconButton
                             onPress={
                                 onSettingsPress ??
                                 (() => router.push("/settings" as Href))
                             }
-                            style={({ pressed }) => iconButtonStyle(pressed)}
-                            accessibilityRole="button"
                             accessibilityLabel="Settings"
                         >
-                            <Settings size={20} color={colors.mutedForeground} />
-                        </Pressable>
-                    )}
-                    {showNotifications && (
-                        <Pressable
+                            <Settings
+                                size={HEADER_ICON_SIZE}
+                                color={colors.mutedForeground}
+                            />
+                        </HeaderIconButton>
+                    ) : null}
+                    {showNotifications ? (
+                        <HeaderIconButton
                             onPress={() =>
                                 router.push("/announcements" as Href)
                             }
-                            style={({ pressed }) => iconButtonStyle(pressed)}
-                            accessibilityRole="button"
                             accessibilityLabel="Notifications"
                         >
-                            <Bell size={20} color={colors.mutedForeground} />
-                        </Pressable>
-                    )}
+                            <Bell
+                                size={HEADER_ICON_SIZE}
+                                color={colors.mutedForeground}
+                            />
+                        </HeaderIconButton>
+                    ) : null}
                 </HStack>
             </HStack>
         </Box>
     )
 }
-
-const styles = StyleSheet.create({
-    iconButton: {
-        height: 40,
-        width: 40,
-        alignItems: "center",
-        justifyContent: "center",
-        borderRadius: 9999,
-    },
-})

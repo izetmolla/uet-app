@@ -1,5 +1,7 @@
 export type CameraCaptureSize = "4:3" | "16:9" | "1:1"
 
+export type PhotosViewMode = "grid" | "list"
+
 export type ScanDocumentsCameraSettings = {
     captureSize: CameraCaptureSize
 }

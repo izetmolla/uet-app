@@ -4,6 +4,7 @@ import {
     persistStudentScanImages,
 } from "@/lib/scan-documents/storage"
 import type {
+    PhotosViewMode,
     ScanDocumentsCameraSettings,
     ScanDocumentsItem,
     ScanDocumentsPhoto,
@@ -19,6 +20,9 @@ const defaultCameraSettings: ScanDocumentsCameraSettings = {
 interface ScanDocumentsState {
     cameraSettings: ScanDocumentsCameraSettings
     setCameraSettings: (settings: Partial<ScanDocumentsCameraSettings>) => void
+    photosViewMode: PhotosViewMode
+    setPhotosViewMode: (mode: PhotosViewMode) => void
+    togglePhotosViewMode: () => void
     items: ScanDocumentsItem[]
     getItem: (itemId: string) => ScanDocumentsItem | undefined
     createItem: (item: ScanDocumentsItem) => void
@@ -42,6 +46,16 @@ export const useScanDocumentsStore = create<ScanDocumentsState>()(
                         ...state.cameraSettings,
                         ...settings,
                     },
+                }))
+            },
+            photosViewMode: "grid",
+            setPhotosViewMode: (mode) => {
+                set({ photosViewMode: mode })
+            },
+            togglePhotosViewMode: () => {
+                set((state) => ({
+                    photosViewMode:
+                        state.photosViewMode === "grid" ? "list" : "grid",
                 }))
             },
             items: [],
@@ -139,6 +153,7 @@ export const useScanDocumentsStore = create<ScanDocumentsState>()(
             partialize: (state) => ({
                 items: state.items,
                 cameraSettings: state.cameraSettings,
+                photosViewMode: state.photosViewMode,
             }),
         }
     )

@@ -15,14 +15,8 @@ import {
 import { Box } from "@/components/ui/box"
 import { Text } from "@/components/ui/text"
 import { useScanDocumentsCameraSession } from "@/components/scan-documents/camera/camera-session-context"
+import { getPreviewAspectRatio } from "@/lib/scan-documents/camera-capture"
 import { useScanDocumentsStore } from "@/store/scan-documents"
-import type { CameraCaptureSize } from "@/types/scan-documents"
-
-const CAPTURE_ASPECT: Record<CameraCaptureSize, number> = {
-    "4:3": 3 / 4,
-    "16:9": 9 / 16,
-    "1:1": 1,
-}
 
 const ScanDocumentsCameraPreview = () => {
     const isFocused = useIsFocused()
@@ -32,6 +26,7 @@ const ScanDocumentsCameraPreview = () => {
     const captureSize = useScanDocumentsStore(
         (s) => s.cameraSettings.captureSize
     )
+    const previewAspect = getPreviewAspectRatio(captureSize)
 
     useEffect(() => {
         if (!hasPermission) {
@@ -74,7 +69,7 @@ const ScanDocumentsCameraPreview = () => {
         <Box className="flex-1 items-center justify-center bg-black">
             <Box
                 className="w-full overflow-hidden"
-                style={{ aspectRatio: CAPTURE_ASPECT[captureSize] }}
+                style={{ aspectRatio: previewAspect, maxHeight: "100%" }}
             >
                 <Camera
                     style={StyleSheet.absoluteFill}

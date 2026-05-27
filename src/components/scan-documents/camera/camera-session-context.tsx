@@ -13,6 +13,7 @@ import {
 } from "react-native-vision-camera"
 
 import {
+    PHOTO_CAPTURE_QUALITY,
     captureSizeToResolution,
     toCaptureFileUri,
 } from "@/lib/scan-documents/camera-capture"
@@ -65,8 +66,7 @@ export function ScanDocumentsCameraSessionProvider({
 
     const photoOutput = usePhotoOutput({
         targetResolution,
-        quality: 0.9,
-        qualityPrioritization: "balanced",
+        ...PHOTO_CAPTURE_QUALITY,
     })
 
     const photos = item?.photos ?? []
