@@ -27,11 +27,11 @@ const quickLinks: QuickLink[] = [
     //     description: "Syllabus, materials, and grades",
     //     href: "/course-details" as Href,
     // },
-    // {
-    //     title: "Campus services",
-    //     description: "Library, transport, and support",
-    //     href: "/campus-services" as Href,
-    // },
+    {
+        title: "Camera",
+        description: "Take photos and videos",
+        href: "/camera" as Href,
+    },
     {
         title: "Camscan",
         description: "Scan documents and manage collections",
