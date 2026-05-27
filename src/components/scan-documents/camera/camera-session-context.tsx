@@ -27,8 +27,16 @@ type ScanDocumentsCameraSessionContextValue = {
     capturePhoto: () => Promise<void>
 }
 
+const MIN_CAPTURE_FREEZE_MS = 180
+
 const ScanDocumentsCameraSessionContext =
     createContext<ScanDocumentsCameraSessionContextValue | null>(null)
+
+function wait(ms: number) {
+    return new Promise<void>((resolve) => {
+        setTimeout(resolve, ms)
+    })
+}
 
 type ScanDocumentsCameraSessionProviderProps = {
     studentId: string
@@ -66,7 +74,9 @@ export function ScanDocumentsCameraSessionProvider({
     const capturePhoto = useCallback(async () => {
         if (!studentId || isCapturing) return
 
+        const freezeStartedAt = Date.now()
         setIsCapturing(true)
+
         try {
             const photoFile = await photoOutput.capturePhotoToFile(
                 { flashMode: "off" },
@@ -84,6 +94,10 @@ export function ScanDocumentsCameraSessionProvider({
                 "Could not take a photo. Please try again."
             )
         } finally {
+            const elapsed = Date.now() - freezeStartedAt
+            if (elapsed < MIN_CAPTURE_FREEZE_MS) {
+                await wait(MIN_CAPTURE_FREEZE_MS - elapsed)
+            }
             setIsCapturing(false)
         }
     }, [

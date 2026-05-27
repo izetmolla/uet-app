@@ -1,6 +1,11 @@
 import { useIsFocused } from "@react-navigation/native"
 import { useEffect } from "react"
-import { ActivityIndicator, Pressable, StyleSheet } from "react-native"
+import {
+    ActivityIndicator,
+    Pressable,
+    StyleSheet,
+    View,
+} from "react-native"
 import {
     Camera,
     useCameraDevice,
@@ -21,7 +26,7 @@ const CAPTURE_ASPECT: Record<CameraCaptureSize, number> = {
 
 const ScanDocumentsCameraPreview = () => {
     const isFocused = useIsFocused()
-    const { photoOutput } = useScanDocumentsCameraSession()
+    const { photoOutput, isCapturing } = useScanDocumentsCameraSession()
     const { hasPermission, requestPermission } = useCameraPermission()
     const device = useCameraDevice("back")
     const captureSize = useScanDocumentsStore(
@@ -77,12 +82,25 @@ const ScanDocumentsCameraPreview = () => {
                     isActive={isFocused}
                     outputs={[photoOutput]}
                     resizeMode="cover"
-                    enableNativeTapToFocusGesture
-                    enableNativeZoomGesture
+                    enableNativeTapToFocusGesture={!isCapturing}
+                    enableNativeZoomGesture={!isCapturing}
                 />
+                {isCapturing ? (
+                    <View
+                        style={styles.freezeOverlay}
+                        pointerEvents="box-only"
+                    />
+                ) : null}
             </Box>
         </Box>
     )
 }
 
 export default ScanDocumentsCameraPreview
+
+const styles = StyleSheet.create({
+    freezeOverlay: {
+        ...StyleSheet.absoluteFillObject,
+        backgroundColor: "rgba(255, 255, 255, 0.22)",
+    },
+})

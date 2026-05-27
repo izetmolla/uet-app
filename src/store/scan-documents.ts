@@ -1,5 +1,8 @@
 import { createId } from "@/lib/camscan/storage"
-import { persistStudentScanImages } from "@/lib/scan-documents/storage"
+import {
+    deleteStudentPhotoFile,
+    persistStudentScanImages,
+} from "@/lib/scan-documents/storage"
 import type {
     ScanDocumentsCameraSettings,
     ScanDocumentsItem,
@@ -26,6 +29,7 @@ interface ScanDocumentsState {
         sourceUri: string,
         title?: string
     ) => Promise<void>
+    deletePhotoFromItem: (itemId: string, photoId: string) => Promise<void>
 }
 
 export const useScanDocumentsStore = create<ScanDocumentsState>()(
@@ -94,6 +98,39 @@ export const useScanDocumentsStore = create<ScanDocumentsState>()(
                     updatedAt: now,
                 }
                 set((state) => ({ items: [item, ...state.items] }))
+            },
+            deletePhotoFromItem: async (itemId, photoId) => {
+                const item = get().getItem(itemId)
+                if (!item) return
+
+                const photo = item.photos.find((p) => p.id === photoId)
+                if (!photo) return
+
+                await deleteStudentPhotoFile(photo.uri)
+
+                const remainingPhotos = item.photos.filter(
+                    (p) => p.id !== photoId
+                )
+                const now = new Date().toISOString()
+
+                if (remainingPhotos.length === 0) {
+                    set((state) => ({
+                        items: state.items.filter((i) => i.id !== itemId),
+                    }))
+                    return
+                }
+
+                set((state) => ({
+                    items: state.items.map((i) =>
+                        i.id === itemId
+                            ? {
+                                  ...i,
+                                  photos: remainingPhotos,
+                                  updatedAt: now,
+                              }
+                            : i
+                    ),
+                }))
             },
         }),
         {
