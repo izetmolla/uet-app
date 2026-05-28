@@ -18,6 +18,7 @@ import {
 } from "@/api/protected/scan-documents/tabs/students"
 import ContentLoader from "@/components/content-loader"
 import { AppHeader } from "@/components/navigation/app-header"
+import { PhotoUploadProgressOverlay } from "@/components/scan-documents/photo-upload-progress-overlay"
 import {
     ScreenContentSafeArea,
     ScreenSafeArea,
@@ -187,14 +188,10 @@ export default function StudentsScreen() {
         const fromRoute = getRouteParam(folder_name)
         if (fromRoute) return fromRoute
 
-        const foldersData =
-            queryClient.getQueryData<ScanDocumentsFoldersResponse>([
-                "scan-documents-tabs",
-            ])
-        return (
-            foldersData?.folders.find((folder) => folder.id === folderId)
-                ?.name ?? "Students"
-        )
+        const foldersData = queryClient.getQueryData<ScanDocumentsFoldersResponse>([
+            "scan-documents-tabs",
+        ])
+        return (foldersData?.folders.find((folder) => folder.id === folderId)?.name ?? "Students")
     }, [folder_name, folderId, queryClient])
 
     const filteredStudents = useMemo(() => {
@@ -227,7 +224,7 @@ export default function StudentsScreen() {
             const shouldStick =
                 titleSectionHeightRef.current > 0 &&
                 offsetY >
-                    titleSectionHeightRef.current + HEADER_TITLE_SEARCH_GAP
+                titleSectionHeightRef.current + HEADER_TITLE_SEARCH_GAP
 
             setIsSearchSticky((prev) =>
                 prev === shouldStick ? prev : shouldStick
@@ -238,6 +235,9 @@ export default function StudentsScreen() {
 
     const listHeader = (
         <VStack space="md" className="pb-3 pt-1">
+            <Box className="-mx-4">
+                <PhotoUploadProgressOverlay />
+            </Box>
             <VStack
                 space="sm"
                 onLayout={(event) =>
@@ -276,7 +276,6 @@ export default function StudentsScreen() {
             </Box>
         </VStack>
     )
-
     return (
         <ScreenSafeArea>
             <AppHeader

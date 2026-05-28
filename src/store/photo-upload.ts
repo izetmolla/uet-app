@@ -14,6 +14,7 @@ type PhotoUploadState = {
     initUploadSession: (studentId: string, photoIds: string[]) => void
     setBatchMeta: (studentId: string, total: number) => void
     clearBatchMeta: (studentId: string) => void
+    setPhotoUploading: (studentId: string, photoId: string) => void
     setPhotoProgress: (
         studentId: string,
         photoId: string,
@@ -27,6 +28,7 @@ type PhotoUploadState = {
     ) => void
     clearPhotoStatus: (studentId: string, photoId: string) => void
     clearUploadingPhotos: (studentId: string) => void
+    clearUploadSession: (studentId: string) => void
 }
 
 const defaultEntry: PhotoUploadEntry = { status: "idle" }
@@ -36,9 +38,7 @@ export const usePhotoUploadStore = create<PhotoUploadState>((set) => ({
     batchMeta: {},
     initUploadSession: (studentId, photoIds) => {
         set((state) => {
-            const session: StudentUploadSession = {
-                ...(state.sessions[studentId] ?? {}),
-            }
+            const session: StudentUploadSession = {}
 
             for (const photoId of photoIds) {
                 session[photoId] = { status: "uploading", progress: 0 }
@@ -51,6 +51,17 @@ export const usePhotoUploadStore = create<PhotoUploadState>((set) => ({
                 },
             }
         })
+    },
+    setPhotoUploading: (studentId, photoId) => {
+        set((state) => ({
+            sessions: {
+                ...state.sessions,
+                [studentId]: {
+                    ...(state.sessions[studentId] ?? {}),
+                    [photoId]: { status: "uploading", progress: 0 },
+                },
+            },
+        }))
     },
     setBatchMeta: (studentId, total) => {
         set((state) => ({
@@ -140,6 +151,17 @@ export const usePhotoUploadStore = create<PhotoUploadState>((set) => ({
                     [studentId]: session,
                 },
             }
+        })
+    },
+    clearUploadSession: (studentId) => {
+        set((state) => {
+            const sessions = { ...state.sessions }
+            delete sessions[studentId]
+
+            const batchMeta = { ...state.batchMeta }
+            delete batchMeta[studentId]
+
+            return { sessions, batchMeta }
         })
     },
 }))

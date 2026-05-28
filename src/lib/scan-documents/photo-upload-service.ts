@@ -32,9 +32,15 @@ async function uploadSinglePhoto(
 ) {
     if (job.cancelled) return
 
-    const { setPhotoProgress, setPhotoSuccess, setPhotoError, clearPhotoStatus } =
-        getStore()
+    const {
+        setPhotoUploading,
+        setPhotoProgress,
+        setPhotoSuccess,
+        setPhotoError,
+        clearPhotoStatus,
+    } = getStore()
 
+    setPhotoUploading(job.studentId, photo.id)
     setPhotoProgress(job.studentId, photo.id, 0)
 
     const controller = new AbortController()
@@ -63,12 +69,6 @@ async function uploadSinglePhoto(
         if (job.cancelled) return
 
         setPhotoSuccess(job.studentId, photo.id)
-
-        setTimeout(() => {
-            if (!job.cancelled) {
-                clearPhotoStatus(job.studentId, photo.id)
-            }
-        }, 1200)
     } catch (error) {
         if (job.cancelled || isUploadCancelled(error)) {
             clearPhotoStatus(job.studentId, photo.id)
@@ -89,15 +89,6 @@ function finishJobIfIdle(job: UploadJob) {
     if (job.controllers.size > 0) return
 
     activeJobs.delete(job.studentId)
-
-    const session = getStore().sessions[job.studentId]
-    const stillUploading = session
-        ? Object.values(session).some((entry) => entry.status === "uploading")
-        : false
-
-    if (!stillUploading) {
-        getStore().clearBatchMeta(job.studentId)
-    }
 }
 
 async function runUploadBatch(
@@ -167,6 +158,35 @@ export function cancelPhotoUploadBatch(
 
     getStore().clearUploadingPhotos(studentId)
     getStore().clearBatchMeta(studentId)
+}
+
+export function dismissPhotoUploadSession(studentId: string) {
+    const job = activeJobs.get(studentId)
+    if (job && !job.cancelled) {
+        cancelPhotoUploadBatch(studentId, { silent: true })
+    }
+
+    getStore().clearUploadSession(studentId)
+}
+
+export function retryAllFailedPhotoUploads(options: {
+    studentId: string
+    folderId?: string
+    photos: ScanDocumentsPhoto[]
+}) {
+    const { studentId, folderId, photos } = options
+    const session = getStore().sessions[studentId] ?? {}
+    const failedPhotos = photos.filter(
+        (photo) => session[photo.id]?.status === "error"
+    )
+
+    if (failedPhotos.length === 0) return false
+
+    return startPhotoUploadBatch({
+        studentId,
+        folderId,
+        photos: failedPhotos,
+    })
 }
 
 export function retryPhotoUpload(options: {

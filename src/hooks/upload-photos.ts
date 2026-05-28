@@ -2,7 +2,9 @@ import { useCallback, useMemo } from "react"
 
 import {
     cancelPhotoUploadBatch,
+    dismissPhotoUploadSession,
     isPhotoUploadBatchActive,
+    retryAllFailedPhotoUploads,
     retryPhotoUpload,
     startPhotoUploadBatch,
 } from "@/lib/scan-documents/photo-upload-service"
@@ -45,15 +47,21 @@ export function useUploadPhotos({ studentId, folderId }: UseUploadPhotosOptions)
         [sessions, studentId]
     )
 
+    const sessionEntryCount = Object.keys(sessions[studentId] ?? {}).length
+
     const uploadSummary = useMemo(() => {
         const session = sessions[studentId] ?? {}
         const entries = Object.values(session)
         const uploadingCount = entries.filter(
             (entry) => entry.status === "uploading"
         ).length
-        const completedCount = entries.filter(
-            (entry) => entry.status === "success" || entry.status === "error"
+        const uploadedCount = entries.filter(
+            (entry) => entry.status === "success"
         ).length
+        const failedCount = entries.filter(
+            (entry) => entry.status === "error"
+        ).length
+        const completedCount = uploadedCount + failedCount
         const total = batchMeta[studentId]?.total ?? entries.length
 
         let progressSum = 0
@@ -71,12 +79,23 @@ export function useUploadPhotos({ studentId, folderId }: UseUploadPhotosOptions)
         const overallPercent =
             total > 0 ? Math.min(100, Math.round(progressSum / total)) : 0
 
+        const isActive =
+            uploadingCount > 0 || isPhotoUploadBatchActive(studentId)
+        const isFinished =
+            entries.length > 0 &&
+            uploadingCount === 0 &&
+            completedCount >= total
+
         return {
             total,
             uploadingCount,
+            uploadedCount,
+            failedCount,
             completedCount,
             overallPercent,
-            isActive: uploadingCount > 0 || isPhotoUploadBatchActive(studentId),
+            isActive,
+            isFinished,
+            hasVisibleSession: entries.length > 0,
         }
     }, [batchMeta, sessions, studentId])
 
@@ -91,13 +110,26 @@ export function useUploadPhotos({ studentId, folderId }: UseUploadPhotosOptions)
         )
     }, [sessions, studentId])
 
+    const retryAllFailed = useCallback(
+        (photos: ScanDocumentsPhoto[]) =>
+            retryAllFailedPhotoUploads({ studentId, folderId, photos }),
+        [folderId, studentId]
+    )
+
+    const dismissUploadSession = useCallback(() => {
+        dismissPhotoUploadSession(studentId)
+    }, [studentId])
+
     return {
         uploadPhotos,
         cancelUploads,
         retryPhoto,
+        retryAllFailed,
+        dismissUploadSession,
         getPhotoStatus,
         uploadSummary,
         isUploading,
         hasUploadErrors,
+        sessionEntryCount,
     }
 }

@@ -1,6 +1,5 @@
 import { useMemo } from "react"
 
-import { isPhotoUploadBatchActive } from "@/lib/scan-documents/photo-upload-service"
 import { usePhotoUploadStore } from "@/store/photo-upload"
 
 export type GlobalUploadProgress = {
@@ -10,6 +9,7 @@ export type GlobalUploadProgress = {
     uploadedCount: number
     failedCount: number
     inProgressCount: number
+    isFinished: boolean
 }
 
 export function useGlobalUploadProgress(): GlobalUploadProgress | null {
@@ -25,11 +25,8 @@ export function useGlobalUploadProgress(): GlobalUploadProgress | null {
             const uploadingEntries = entries.filter(
                 (entry) => entry.status === "uploading"
             )
-            const isJobActive = isPhotoUploadBatchActive(studentId)
 
-            if (uploadingEntries.length === 0 && !isJobActive) {
-                continue
-            }
+            if (entries.length === 0) continue
 
             const total = batchMeta[studentId]?.total ?? entries.length
             if (total === 0) continue
@@ -50,6 +47,8 @@ export function useGlobalUploadProgress(): GlobalUploadProgress | null {
                 }
             }
 
+            const completedCount = uploadedCount + failedCount
+
             return {
                 studentId,
                 total,
@@ -57,6 +56,8 @@ export function useGlobalUploadProgress(): GlobalUploadProgress | null {
                 failedCount,
                 inProgressCount: uploadingEntries.length,
                 percent: Math.min(100, Math.round(progressSum / total)),
+                isFinished:
+                    uploadingEntries.length === 0 && completedCount >= total,
             }
         }
 

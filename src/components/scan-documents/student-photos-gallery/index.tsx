@@ -8,10 +8,12 @@ import {
 
 import { EmptyCollection } from "@/components/scan-documents/emptycollection"
 import { GalleryPhotoTile } from "@/components/scan-documents/gallery-photo-tile"
+import { PhotoUploadProgressOverlay } from "@/components/scan-documents/photo-upload-progress-overlay"
 import { Box } from "@/components/ui/box"
 import { Text } from "@/components/ui/text"
 import { useUploadPhotos } from "@/hooks/upload-photos"
 import { PORTRAIT_PREVIEW_ASPECT } from "@/lib/scan-documents/camera-capture"
+import { usePhotoUploadStore } from "@/store/photo-upload"
 import { useScanDocumentsStore } from "@/store/scan-documents"
 import type { ScanDocumentsPhoto } from "@/types/scan-documents"
 
@@ -40,10 +42,22 @@ export function StudentPhotosGallery({
     const item = useScanDocumentsStore((s) => s.getItem(studentId))
     const photos = item?.photos ?? []
 
+    const uploadSession = usePhotoUploadStore((s) => s.sessions[studentId])
+    const uploadBatchMeta = usePhotoUploadStore((s) => s.batchMeta[studentId])
+
     const { getPhotoStatus, retryPhoto } = useUploadPhotos({
         studentId,
         folderId,
     })
+
+    const listHeader = (
+        <Box className="-mx-4 -mt-4 mb-1">
+            <PhotoUploadProgressOverlay
+                studentId={studentId}
+                folderId={folderId}
+            />
+        </Box>
+    )
 
     const isGrid = photosViewMode === "grid"
     const numColumns = isGrid ? getGridColumnCount(width) : 1
@@ -129,6 +143,8 @@ export function StudentPhotosGallery({
                 key={`${photosViewMode}-${numColumns}`}
                 data={photos}
                 keyExtractor={(photo) => photo.id}
+                extraData={{ uploadSession, uploadBatchMeta }}
+                ListHeaderComponent={listHeader}
                 renderItem={renderPhoto}
                 numColumns={numColumns}
                 columnWrapperStyle={
