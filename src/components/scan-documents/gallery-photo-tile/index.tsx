@@ -53,6 +53,7 @@ export function GalleryPhotoTile({
 
                 {isUploading ? (
                     <Box
+                        pointerEvents="none"
                         style={StyleSheet.absoluteFill}
                         className="items-center justify-center bg-black/55"
                     >

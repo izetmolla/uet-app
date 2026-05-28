@@ -8,7 +8,6 @@ import {
     useTabBarStyle,
 } from "@/components/navigation/use-tab-bar-style"
 import { ScanDocumentsHeader } from "@/components/scan-documents/header"
-import { StudentPhotoUploadBanner } from "@/components/scan-documents/photo-upload-banner/student-upload-banner"
 import { getRouteParam } from "@/components/scan-documents/student-tab-shell"
 import { useDisableDrawerSwipe } from "@/hooks/use-disable-drawer-swipe"
 import { useScanDocumentsStore } from "@/store/scan-documents"
@@ -74,14 +73,8 @@ export default function StudentTabsLayout() {
         [headerTitle, openSettings]
     )
 
-    const studentId = getRouteParam(student_id) ?? ""
-
     return (
         <ScreenSafeArea>
-            <StudentPhotoUploadBanner
-                studentId={studentId}
-                folderId={getRouteParam(folder_id)}
-            />
             <Tabs
                 screenOptions={{
                     headerShown: true,

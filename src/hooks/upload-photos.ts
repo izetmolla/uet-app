@@ -56,10 +56,26 @@ export function useUploadPhotos({ studentId, folderId }: UseUploadPhotosOptions)
         ).length
         const total = batchMeta[studentId]?.total ?? entries.length
 
+        let progressSum = 0
+        for (const entry of entries) {
+            if (entry.status === "uploading") {
+                progressSum += entry.progress
+            } else if (
+                entry.status === "success" ||
+                entry.status === "error"
+            ) {
+                progressSum += 100
+            }
+        }
+
+        const overallPercent =
+            total > 0 ? Math.min(100, Math.round(progressSum / total)) : 0
+
         return {
             total,
             uploadingCount,
             completedCount,
+            overallPercent,
             isActive: uploadingCount > 0 || isPhotoUploadBatchActive(studentId),
         }
     }, [batchMeta, sessions, studentId])
