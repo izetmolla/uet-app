@@ -9,6 +9,8 @@ export type ContractUploadBody = {
     student_id?: string
     folder_id?: string
     photo_id?: string
+    pdf_id?: string
+    document_type?: "photo" | "pdf"
 }
 
 export type UploadContractPhotoOptions = {

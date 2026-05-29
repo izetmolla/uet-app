@@ -19,3 +19,11 @@ export type ScanDocumentsItem = {
     createdAt: string
     updatedAt: string
 }
+
+export type ScanDocumentsPdf = {
+    id: string
+    title: string
+    uri: string
+    pageCount: number
+    createdAt: string
+}

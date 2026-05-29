@@ -1,6 +1,6 @@
-import { useRouter } from "expo-router"
+import { type Href, useRouter } from "expo-router"
 import { FileDown, Images, X } from "lucide-react-native"
-import { useCallback, useState } from "react"
+import { useCallback } from "react"
 import { ActivityIndicator, Alert } from "react-native"
 
 import {
@@ -11,9 +11,10 @@ import { Box } from "@/components/ui/box"
 import { Button, ButtonIcon, ButtonText } from "@/components/ui/button"
 import { HStack } from "@/components/ui/hstack"
 import { VStack } from "@/components/ui/vstack"
+import { useUploadPdf } from "@/hooks/upload-pdf"
 import { useUploadPhotos } from "@/hooks/upload-photos"
 import { useThemeColors } from "@/hooks/use-theme-colors"
-import { exportCollectionToPdf } from "@/lib/camscan/export-collection-pdf"
+import { getOrderedStudentPhotos } from "@/lib/scan-documents/ordered-photos"
 import type { ScanDocumentsPhoto } from "@/types/scan-documents"
 
 type PublishOptionsSheetProps = {
@@ -31,41 +32,58 @@ export function PublishOptionsSheet({
 }: PublishOptionsSheetProps) {
     const router = useRouter()
     const colors = useThemeColors()
-    const [exportingPdf, setExportingPdf] = useState(false)
     const { uploadPhotos } = useUploadPhotos({
         studentId,
         folderId,
     })
+    const { uploadPdfFromPhotos, uploadSummary: pdfUploadSummary } =
+        useUploadPdf({
+            studentId,
+            folderId,
+        })
 
     const close = useCallback(() => {
         router.back()
     }, [router])
 
     const ensureHasPhotos = useCallback(() => {
-        if (photos.length > 0) return true
+        const orderedPhotos = getOrderedStudentPhotos(studentId)
+        if (orderedPhotos.length > 0) return true
 
         Alert.alert(
             "No photos yet",
             "Scan documents for this student before publishing."
         )
         return false
-    }, [photos.length])
+    }, [studentId])
 
-    const handlePublishPdf = useCallback(async () => {
-        if (!ensureHasPhotos() || exportingPdf) return
+    const handlePublishPdf = useCallback(() => {
+        if (!ensureHasPhotos() || pdfUploadSummary.isActive) return
 
-        setExportingPdf(true)
-        try {
-            await exportCollectionToPdf(photos, title)
-        } catch {
+        const started = uploadPdfFromPhotos(photos, title)
+        if (!started) {
             Alert.alert(
-                "Export failed",
-                "Could not create the PDF. Please try again."
+                "Upload failed",
+                "Could not start PDF generation. Please try again."
             )
-        } finally {
-            setExportingPdf(false)
+            return
         }
-    }, [ensureHasPhotos, exportingPdf, photos, title])
+
+        close()
+        const pdfHref =
+            `/scan-documents/students/${folderId ?? ""}/${studentId}/pdf?student_name=${encodeURIComponent(title)}` as Href
+        router.push(pdfHref)
+    }, [
+        close,
+        ensureHasPhotos,
+        folderId,
+        pdfUploadSummary.isActive,
+        photos,
+        router,
+        studentId,
+        title,
+        uploadPdfFromPhotos,
+    ])
 
     const handlePublishPhotos = useCallback(() => {
         if (!ensureHasPhotos()) return
@@ -76,7 +94,7 @@ export function PublishOptionsSheet({
         }
     }, [close, ensureHasPhotos, photos, uploadPhotos])
 
-    const busy = exportingPdf
+    const busy = pdfUploadSummary.isActive
 
     return (
         <Box className="flex-1 bg-background-0">
@@ -97,7 +115,7 @@ export function PublishOptionsSheet({
                     isDisabled={busy}
                     className="min-h-14 bg-primary-500"
                 >
-                    {exportingPdf ? (
+                    {busy ? (
                         <ActivityIndicator color="#ffffff" />
                     ) : (
                         <>

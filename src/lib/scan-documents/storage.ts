@@ -42,3 +42,23 @@ export async function deleteStudentPhotoFile(uri: string) {
         await deleteAsync(uri, { idempotent: true })
     }
 }
+
+export async function persistStudentPdf(
+    studentId: string,
+    sourceUri: string,
+    pdfId: string
+): Promise<string> {
+    const studentDir = `${STUDENT_SCANS_ROOT}${studentId}/pdfs/`
+    await ensureDir(studentDir)
+
+    const dest = `${studentDir}${pdfId}.pdf`
+    await copyAsync({ from: sourceUri, to: dest })
+    return dest
+}
+
+export async function deleteStudentPdfFile(uri: string) {
+    const info = await getInfoAsync(uri)
+    if (info.exists) {
+        await deleteAsync(uri, { idempotent: true })
+    }
+}

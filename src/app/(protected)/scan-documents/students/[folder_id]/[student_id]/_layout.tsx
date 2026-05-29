@@ -24,6 +24,13 @@ export default function StudentLayout() {
                     headerShown: false,
                 }}
             />
+            <Stack.Screen
+                name="pdf-preview"
+                options={{
+                    presentation: "fullScreenModal",
+                    headerShown: false,
+                }}
+            />
         </Stack>
     )
 }

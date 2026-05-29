@@ -1,5 +1,5 @@
 import { type Href, router, Tabs, useLocalSearchParams } from "expo-router"
-import { ClipboardCheck, Scan, Upload } from "lucide-react-native"
+import { ClipboardCheck, FileText, Scan, Upload } from "lucide-react-native"
 import { useCallback } from "react"
 
 import { ScreenSafeArea } from "@/components/navigation/screen-safe-area"
@@ -95,6 +95,8 @@ export default function StudentTabsLayout() {
                         header: renderDocumentsHeader,
                     }}
                 />
+
+
                 <Tabs.Screen
                     name="scan-now"
                     options={{
@@ -165,6 +167,15 @@ export default function StudentTabsLayout() {
                                 },
                             } as Href)
                         },
+                    }}
+                />
+                <Tabs.Screen
+                    name="pdf"
+                    options={{
+                        title: "PDF",
+                        tabBarIcon: ({ color, size }) => (
+                            <FileText color={color} size={size} />
+                        ),
                     }}
                 />
             </Tabs>
