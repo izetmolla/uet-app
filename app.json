@@ -67,7 +67,8 @@
       ],
       "expo-web-browser",
       "expo-video",
-      "expo-sharing"
+      "expo-sharing",
+      "./plugins/with-react-native-share-menu"
     ],
     "experiments": {
       "typedRoutes": true,

@@ -1,0 +1,52 @@
+diff --git a/android/build.gradle b/android/build.gradle
+index 9557fdbf2fbf97b7f7aeaf7ce86d301a8ced213d..a527c95694fdd596575cbfebeee1fb8df2ace0c2 100644
+--- a/android/build.gradle
++++ b/android/build.gradle
+@@ -1,17 +1,15 @@
+ apply plugin: 'com.android.library'
+ 
+ android {
+-    compileSdkVersion 29
+-    buildToolsVersion "29.0.2"
++    namespace "com.meedan"
++    compileSdkVersion rootProject.ext.compileSdkVersion
++    buildToolsVersion rootProject.ext.buildToolsVersion
+ 
+     defaultConfig {
+-        minSdkVersion 16
+-        targetSdkVersion 29
++        minSdkVersion rootProject.ext.minSdkVersion
++        targetSdkVersion rootProject.ext.targetSdkVersion
+         versionCode 1
+         versionName "1.0"
+-        ndk {
+-            abiFilters "armeabi-v7a", "x86"
+-        }
+     }
+     lintOptions {
+        warning 'InvalidPackage'
+diff --git a/index.js b/index.js
+index e8e1b73ae85f3d86bf01e8d650e388f7fd6fa373..b374a8a1cbde7248f8d5af015ae8bb76ebed3b5e 100644
+--- a/index.js
++++ b/index.js
+@@ -2,7 +2,19 @@ import { NativeModules, NativeEventEmitter } from "react-native";
+ 
+ const { ShareMenu } = NativeModules;
+ 
+-const EventEmitter = new NativeEventEmitter(ShareMenu);
++function createShareMenuEventEmitter() {
++  if (
++    ShareMenu &&
++    typeof ShareMenu.addListener === "function" &&
++    typeof ShareMenu.removeListeners === "function"
++  ) {
++    return new NativeEventEmitter(ShareMenu);
++  }
++
++  return new NativeEventEmitter();
++}
++
++const EventEmitter = createShareMenuEventEmitter();
+ 
+ const NEW_SHARE_EVENT_NAME = "NewShareEvent";
+ 

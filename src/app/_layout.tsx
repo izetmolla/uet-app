@@ -4,6 +4,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler"
 import { SafeAreaProvider } from "react-native-safe-area-context"
 
 import Providers from "@/components/providers"
+import { ShareMenuListener } from "@/components/share-menu/share-menu-listener"
 import { SplashScreenController } from "@/components/splash-screen-controller"
 import { ColorModeProvider } from "@/contexts/color-mode"
 import "@/global.css"
@@ -21,6 +22,7 @@ export default function RootLayout() {
                 <ColorModeProvider>
                     <Providers>
                         <SplashScreenController />
+                        <ShareMenuListener />
                         <Stack screenOptions={{ headerShown: false }} />
                     </Providers>
                 </ColorModeProvider>
